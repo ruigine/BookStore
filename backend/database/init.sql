@@ -36,6 +36,7 @@ CREATE TABLE Orders (
     title VARCHAR(255) NOT NULL,
     authors TEXT,
     url TEXT,
+    order_date DATE NOT NULL,
 
     FOREIGN KEY (book_id) REFERENCES Books(book_id),
     FOREIGN KEY (user_id) REFERENCES Users(user_id)

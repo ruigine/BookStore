@@ -27,5 +27,16 @@ services:
     ports:
       - "5002:5002"
 
+  orders:
+    build: ./backend/orders
+    environment:
+      - dbURL=${dbURL}
+    depends_on:
+      - db
+      - users
+      - books
+    ports:
+      - "5003:5003" # remove later
+
 volumes:
   mysql_data:
