@@ -18,5 +18,14 @@ services:
     ports:
       - "5001:5001"
 
+  books:
+    build: ./backend/books
+    environment:
+      - dbURL=${dbURL}
+    depends_on:
+      - db
+    ports:
+      - "5002:5002"
+
 volumes:
   mysql_data:
