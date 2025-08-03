@@ -1,0 +1,6 @@
+flask
+flask-cors
+flask-sqlalchemy
+werkzeug
+mysql-connector-python
+PyJWT
