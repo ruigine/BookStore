@@ -10,6 +10,7 @@ services:
 
   users:
     build: ./backend/users
+    restart: always
     environment:
       - dbURL=${dbURL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
@@ -20,6 +21,7 @@ services:
 
   books:
     build: ./backend/books
+    restart: always
     environment:
       - dbURL=${dbURL}
     depends_on:
@@ -29,6 +31,7 @@ services:
 
   orders:
     build: ./backend/orders
+    restart: always
     environment:
       - dbURL=${dbURL}
     depends_on:
@@ -50,6 +53,7 @@ services:
 
   placeorder:
     build: ./backend/place_order
+    restart: always
     environment:
       - dbURL=${dbURL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
@@ -63,6 +67,19 @@ services:
       - rabbitmq
     ports:
       - "5004:5004"
+
+  orderprocessing:
+    build: ./backend/order_processing
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_PW}
+    depends_on:
+      - db
+      - users
+      - books
+      - orders
+      - rabbitmq
 
 volumes:
   mysql_data:

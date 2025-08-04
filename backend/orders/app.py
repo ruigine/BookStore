@@ -46,7 +46,7 @@ def create_order():
 def update_order_status(order_id):
     try:
         data = request.get_json()
-        order = Order.query.get(order_id)
+        order = db.session.get(Order, order_id)
 
         if not order:
             return jsonify(
@@ -77,7 +77,7 @@ def update_order_status(order_id):
 @app.get("/orders/<int:order_id>")
 def get_order(order_id):
     try:
-        order = Order.query.get(order_id)
+        order = db.session.get(Order, order_id)
         if not order:
             return jsonify(
                 {

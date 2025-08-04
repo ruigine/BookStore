@@ -70,7 +70,7 @@ def get_books():
 @app.get("/books/<int:book_id>")
 def get_book_by_id(book_id):
     try:
-        book = Book.query.get(book_id)
+        book = db.session.get(Book, book_id)
         if not book:
             return jsonify(
                 {
