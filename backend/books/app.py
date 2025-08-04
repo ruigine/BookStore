@@ -38,12 +38,24 @@ def get_books():
                 Book.ISBN.ilike(search_term)
             ))
 
-        books = query.all()
+        # Pagination
+        page = request.args.get('page', 1, type=int)
+        limit = request.args.get('limit', 10, type=int)
+        offset = (page - 1) * limit
+
+        total_books = query.count()
+        books = query.offset(offset).limit(limit).all()
 
         return jsonify(
             {
                 "code": 200,
-                "data": [book.json() for book in books]
+                "data": [book.json() for book in books],
+                "pagination": {
+                    "page": page,
+                    "limit": limit,
+                    "total": total_books,
+                    "has_more": offset + limit < total_books
+                }
             }
         ), 200
 
