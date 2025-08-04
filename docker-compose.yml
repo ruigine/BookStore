@@ -81,5 +81,19 @@ services:
       - orders
       - rabbitmq
 
+  displayorders:
+    build: ./backend/display_orders
+    restart: always
+    environment:
+      - dbURL=${dbURL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    depends_on:
+      - db
+      - users
+      - books
+      - orders
+    ports:
+      - "5005:5005"
+
 volumes:
   mysql_data:
