@@ -75,7 +75,7 @@ def update_order_status(order_id):
         ), 500
 
 
-@app.get("/orders/<int:user_id>")
+@app.get("/orders/user/<int:user_id>")
 def get_orders_by_user(user_id):
     try:
         orders = Order.query.filter_by(user_id=user_id).all()
