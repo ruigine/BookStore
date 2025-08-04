@@ -48,6 +48,38 @@ def place_order():
                 "code": 500, "message": f"An error occurred: {str(e)}"
             }
         ), 500
+    
+@app.get("/checkorder/<int:order_id>")
+@jwt_required
+def check_order_status(order_id):
+    try:
+        response = requests.get(f"{ORDERS_URL}/{order_id}")
+        if response.status_code != 200:
+            return jsonify(response.json()), response.status_code
+
+        order = response.json()["data"]
+
+        if order["user_id"] != int(request.user["sub"]):
+            return jsonify({"code": 403, "message": "Forbidden. Order does not belong to this user."}), 403
+
+        return jsonify(
+            {
+                "code": 200,
+                "data": {
+                    "order_id": order["order_id"],
+                    "status": order["status"]
+                }
+            }
+        ), 200
+
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 500,
+                "message": f"An error occurred: {str(e)}"
+            }
+        ), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5004, debug=True)
