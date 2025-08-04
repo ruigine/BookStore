@@ -1,0 +1,53 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import requests
+from auth import jwt_required
+from rabbitmq import RabbitMQClient
+
+app = Flask(__name__)
+CORS(app)
+
+ORDERS_URL = "http://orders:5003/orders"
+
+@app.post("/placeorder")
+@jwt_required
+def place_order():
+    try:
+        data = request.get_json()
+
+        order_payload = {
+            "book_id": data["book_id"],
+            "user_id": request.user["sub"],
+            "price": data["price"],
+            "quantity": data["quantity"],
+            "status": "pending",
+            "title": data["title"],
+            "authors": data["authors"],
+            "url": data["url"]
+        }
+
+        response = requests.post(ORDERS_URL, json=order_payload)
+        if response.status_code != 201:
+            return jsonify(response.json()), response.status_code
+
+        order_data = response.json()["data"]
+
+        client = RabbitMQClient()
+        client.publish(order_data)
+
+        return jsonify(
+            {
+                "code": 201,
+                "data": order_data
+            }
+        ), 201
+
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 500, "message": f"An error occurred: {str(e)}"
+            }
+        ), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5004, debug=True)

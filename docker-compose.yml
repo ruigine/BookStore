@@ -48,5 +48,21 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBIT_PW}
 
+  placeorder:
+    build: ./backend/place_order
+    environment:
+      - dbURL=${dbURL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_PW}
+    depends_on:
+      - db
+      - users
+      - books
+      - orders
+      - rabbitmq
+    ports:
+      - "5004:5004"
+
 volumes:
   mysql_data:
