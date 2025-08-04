@@ -110,7 +110,7 @@ def login():
             ), 401
 
         token = jwt.encode({
-            "sub": user.user_id,
+            "sub": str(user.user_id),
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(hours=2)
         }, environ.get('JWT_SECRET_KEY'), algorithm="HS256")
