@@ -38,5 +38,15 @@ services:
     ports:
       - "5003:5003" # remove later
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PW}
+
 volumes:
   mysql_data:
