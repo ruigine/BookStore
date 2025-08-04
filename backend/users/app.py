@@ -1,6 +1,6 @@
 from os import environ
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from model import db, User
@@ -110,8 +110,9 @@ def login():
             ), 401
 
         token = jwt.encode({
-            "user_id": user.user_id,
-            "exp": datetime.now() + timedelta(hours=2)
+            "sub": user.user_id,
+            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(timezone.utc) + timedelta(hours=2)
         }, environ.get('JWT_SECRET_KEY'), algorithm="HS256")
 
         return jsonify(
