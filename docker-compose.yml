@@ -52,7 +52,9 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBIT_PW}
 
   placeorder:
-    build: ./backend/place_order
+    build:
+      context: ./backend
+      dockerfile: place_order/Dockerfile
     restart: always
     environment:
       - dbURL=${dbURL}
@@ -69,7 +71,9 @@ services:
       - "5004:5004"
 
   orderprocessing:
-    build: ./backend/order_processing
+    build:
+      context: ./backend
+      dockerfile: order_processing/Dockerfile
     restart: always
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
@@ -82,7 +86,9 @@ services:
       - rabbitmq
 
   displayorders:
-    build: ./backend/display_orders
+    build: 
+      context: ./backend
+      dockerfile: display_orders/Dockerfile
     restart: always
     environment:
       - dbURL=${dbURL}
