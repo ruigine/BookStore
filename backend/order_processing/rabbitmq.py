@@ -37,27 +37,43 @@ class RabbitMQClient:
             print("[x] AMQP Error:", e)
         return False
 
-    def check_setup(self):
-        if not self.is_connection_open():
-            print("[!] Creating RabbitMQ connection...")
-            params = pika.ConnectionParameters(
-                host=self.host,
-                port=self.port,
-                credentials=self.credentials,
-                heartbeat=600,
-                blocked_connection_timeout=300
-            )
-            self.connection = pika.BlockingConnection(params)
-            self.channel = self.connection.channel()
+    def check_setup(self, max_retries=5, delay=2):
+        retries = 0
+        while retries < max_retries:
+            try:
+                if not self.is_connection_open():
+                    print("[!] Creating RabbitMQ connection...")
+                    params = pika.ConnectionParameters(
+                        host=self.host,
+                        port=self.port,
+                        credentials=self.credentials,
+                        heartbeat=600,
+                        blocked_connection_timeout=300
+                    )
+                    self.connection = pika.BlockingConnection(params)
+                    self.channel = self.connection.channel()
 
-        if not self.channel or self.channel.is_closed:
-            print("[!] Creating RabbitMQ channel...")
-            self.channel = self.connection.channel()
+                if not self.channel or self.channel.is_closed:
+                    print("[!] Creating RabbitMQ channel...")
+                    self.channel = self.connection.channel()
 
-        # Declare exchange and queue
-        self.channel.exchange_declare(exchange=self.exchange, exchange_type=self.exchange_type, durable=True)
-        self.channel.queue_declare(queue=self.queue, durable=True)
-        self.channel.queue_bind(exchange=self.exchange, queue=self.queue, routing_key=self.routing_key)
+                # Declare exchange and queue
+                self.channel.exchange_declare(exchange=self.exchange, exchange_type=self.exchange_type, durable=True)
+                self.channel.queue_declare(queue=self.queue, durable=True)
+                self.channel.queue_bind(exchange=self.exchange, queue=self.queue, routing_key=self.routing_key)
+
+                print("[✓] RabbitMQ setup complete.")
+                return  # Success
+            except pika.exceptions.AMQPConnectionError as e:
+                print(f"[!] RabbitMQ connection failed (attempt {retries + 1}/{max_retries}): {e}")
+            except Exception as e:
+                print(f"[!] Unexpected error during setup (attempt {retries + 1}/{max_retries}): {e}")
+
+            retries += 1
+            time.sleep(delay)
+
+        raise RuntimeError(f"[x] Failed to connect to RabbitMQ after {max_retries} attempts.")
+
 
     def publish(self, payload):
         self.check_setup()
