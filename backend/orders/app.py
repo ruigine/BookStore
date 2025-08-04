@@ -74,6 +74,32 @@ def update_order_status(order_id):
             }
         ), 500
 
+@app.get("/orders/<int:order_id>")
+def get_order(order_id):
+    try:
+        order = Order.query.get(order_id)
+        if not order:
+            return jsonify(
+                {
+                    "code": 404,
+                    "message": "Order not found."
+                }
+            ), 404
+
+        return jsonify(
+            {
+                "code": 200,
+                "data": order.json()
+            }
+        ), 200
+
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 500,
+                "message": f"An error occurred: {str(e)}"
+            }
+        ), 500
 
 @app.get("/orders/user/<int:user_id>")
 def get_orders_by_user(user_id):
