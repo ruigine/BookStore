@@ -1,4 +1,14 @@
+networks:
+  public_net:
+  internal_net:
+
 services:
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "5173:3000"
+  #   networks:
+  #     - public_net
   db:
     image: mysql:8.0
     environment:
@@ -7,6 +17,8 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - internal_net
 
   users:
     build: ./backend/users
@@ -18,6 +30,9 @@ services:
       - db
     ports:
       - "5001:5001"
+    networks:
+      - public_net
+      - internal_net
 
   books:
     build: ./backend/books
@@ -28,6 +43,9 @@ services:
       - db
     ports:
       - "5002:5002"
+    networks:
+      - public_net
+      - internal_net
 
   orders:
     build: ./backend/orders
@@ -38,18 +56,22 @@ services:
       - db
       - users
       - books
-    ports:
-      - "5003:5003" # remove later
+    # ports:
+    #   - "5003:5003" # remove later
+    networks:
+      - internal_net
 
   rabbitmq:
     image: rabbitmq:4-management
     restart: always
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    # ports:
+    #   - "5672:5672"
+    #   - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBIT_PW}
+    networks:
+      - internal_net
 
   placeorder:
     build:
@@ -69,6 +91,9 @@ services:
       - rabbitmq
     ports:
       - "5004:5004"
+    networks:
+      - public_net
+      - internal_net
 
   orderprocessing:
     build:
@@ -84,6 +109,8 @@ services:
       - books
       - orders
       - rabbitmq
+    networks:
+      - internal_net
 
   displayorders:
     build: 
@@ -100,6 +127,9 @@ services:
       - orders
     ports:
       - "5005:5005"
+    networks:
+      - public_net
+      - internal_net
 
 volumes:
   mysql_data:
