@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import BookFilters from "../components/bookfilters";
 import { SERVICE_URLS } from "../src/constants";
+import { Menu, Search, ChevronUp, ChevronDown } from "lucide-react";
 
 export default function BrowseBooks() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -15,6 +16,8 @@ export default function BrowseBooks() {
   const [books, setBooks] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  const [opened, setOpened] = useState(false);
 
   const handleScroll = () => {
     const scrollTop = window.scrollY;
@@ -105,6 +108,23 @@ export default function BrowseBooks() {
       </div>
 
       <div className="col-span-13 lg:col-span-4">
+        <div
+          className="md:hidden pl-10 py-3 w-full sticky top-13 z-40 text-white"
+          style={{
+            backgroundImage: "url('/images/green-noise.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div
+            className="flex items-center gap-1 cursor-pointer hover:underline hover:italic w-fit select-none"
+            onClick={() => setOpened(!opened)}
+          >
+            <span>Filters</span>
+            {opened ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </div>
+        </div>
+
         <h1 className="text-4xl text-center mt-9 font-[Great_Vibes]">— Browse Books —</h1>
 
         {Array.isArray(books) && books.length > 0 ? (
