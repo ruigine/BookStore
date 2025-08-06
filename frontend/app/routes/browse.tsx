@@ -67,8 +67,8 @@ export default function BrowseBooks() {
   }, []);
 
   return (
-    <div className="grid grid-cols-24 lg:grid-cols-6 gap-4">
-      <div className="col-span-11 lg:col-span-2 m-5 relative select-none">
+    <div className="grid md:grid-cols-24 lg:grid-cols-6 gap-4">
+      <div className="hidden md:block md:col-span-11 lg:col-span-2 m-5 relative select-none">
         <div className="sticky top-10 left-0">
         <BookFilters
           searchTerm={searchTerm}
@@ -108,13 +108,13 @@ export default function BrowseBooks() {
         <h1 className="text-4xl text-center mt-9 font-[Great_Vibes]">— Browse Books —</h1>
 
         {Array.isArray(books) && books.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 p-6">
             {books.map((book: any) => (
               <div
                 key={book.book_id}
-                className="group p-4 text-center text-sm text-stone-700 border border-[#eedab8] rounded-xl "
+                className="group py-4 -mx-1 text-center text-sm text-stone-700 border border-[#eedab8] rounded-xl w-full"
               >
-                <div className="relative w-[140px] h-[200px] mb-6 [perspective:1000px] mx-auto">
+                <div className="w-max-full w-[140px] h-[200px] mb-6 [perspective:1000px] mx-auto">
                   <div className="h-full w-full relative transition-transform duration-500 group-hover:rotate-y-[18deg] group-hover:scale-[1.04] transform-style-preserve-3d">
 
                     {/* Book Face */}
@@ -141,12 +141,12 @@ export default function BrowseBooks() {
                 </div>
 
                 <h2
-                  className="mb-2 truncate group-hover:underline"
+                  className="mb-2 truncate group-hover:underline px-2"
                   title={book.title}
                 >
                   {book.title}
                 </h2>
-                <p className="italic text-[0.90rem] text-stone-500 mb-1">by {book.authors}</p>
+                <p className="italic text-[0.90rem] text-stone-500 mb-1 px-2">by {book.authors}</p>
                 <p className="text-sm mb-2 text-green-700">${book.price}</p>
               </div>
             ))}
