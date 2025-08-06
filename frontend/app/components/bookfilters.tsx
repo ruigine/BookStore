@@ -19,10 +19,15 @@ export default function BookFilters({
   onChangeFilters,
 }: BookFiltersProps) {
   const [searchInput, setSearchInput] = useState(searchTerm);
+  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>(priceRange);
 
   useEffect(() => {
     setSearchInput(searchTerm);
   }, [searchTerm]);
+
+  useEffect(() => {
+    setLocalPriceRange(priceRange);
+  }, [priceRange]);
 
   useEffect(() => {
     if (searchInput.trim() === "") {
@@ -123,14 +128,15 @@ export default function BookFilters({
       <div className="mb-8">
         <h2 className="text-lg mb-2 font-[Eagle_Lake]">III. Price Range</h2>
         <div className="ml-8 mb-2 font-serif text-[#5B4636]">
-          ${priceRange[0]} – ${priceRange[1]}
+          ${localPriceRange[0]} – ${localPriceRange[1]}
         </div>
         <Slider
-          value={priceRange}
-          min={1}
+          value={localPriceRange}
+          min={0}
           max={100}
           step={1}
-          onValueChange={(newRange) =>
+          onValueChange={(newRange) => setLocalPriceRange(newRange)}
+          onValueCommit={(newRange) =>
             onChangeFilters({ priceRange: [newRange[0], newRange[1]] })
           }
         />
