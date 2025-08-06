@@ -3,24 +3,31 @@ import { Slider } from "./ui/slider";
 
 interface BookFiltersProps {
   searchTerm: string;
-  setSearchTerm: (val: string) => void;
   selectedGenre: string | null;
-  setSelectedGenre: (val: string | null) => void;
   priceRange: [number, number];
-  setPriceRange: (val: [number, number]) => void;
+  onChangeFilters: (filters: {
+    searchTerm?: string;
+    selectedGenre?: string | null;
+    priceRange?: [number, number];
+  }) => void;
 }
 
 export default function BookFilters({
   searchTerm,
-  setSearchTerm,
   selectedGenre,
-  setSelectedGenre,
   priceRange,
-  setPriceRange,
+  onChangeFilters,
 }: BookFiltersProps) {
-const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(searchTerm);
+
+  useEffect(() => {
+    setSearchInput(searchTerm);
+  }, [searchTerm]);
+
   const handleGenreClick = (genre: string) => {
-    setSelectedGenre((prev: string | null) => (prev === genre ? null : genre));
+    onChangeFilters({
+      selectedGenre: selectedGenre === genre ? null : genre,
+    });
   };
 
   return (
@@ -55,7 +62,7 @@ const [searchInput, setSearchInput] = useState("");
           />
           <button
             type="submit"
-            onClick={() => setSearchTerm(searchInput)}
+            onClick={() => onChangeFilters({ searchTerm: searchInput })}
             className="absolute top-0 right-0 h-full px-4 py-2 text-[#5B4636] font-serif italic bg-[#FFFAF0] hover:bg-[#f3e8d7] transition-colors"
           >
             Search
@@ -84,8 +91,7 @@ const [searchInput, setSearchInput] = useState("");
                     value={genre}
                     className="hidden"
                     checked={isSelected}
-                    onChange={() => setSelectedGenre(genre)}
-                    onClick={() => handleGenreClick(genre)}
+                    onChange={() => handleGenreClick(genre)}
                   />
                   <span
                     className={`mr-2 p-1 text-center border-[#CBB994] rounded-full text-sm italic ${
@@ -105,15 +111,17 @@ const [searchInput, setSearchInput] = useState("");
       {/* Price Range */}
       <div className="mb-8">
         <h2 className="text-lg mb-2 font-[Eagle_Lake]">III. Price Range</h2>
-        <div className="ml-8 mb-2">
+        <div className="ml-8 mb-2 font-serif text-[#5B4636]">
           ${priceRange[0]} – ${priceRange[1]}
         </div>
         <Slider
-          defaultValue={priceRange}
+          value={priceRange}
           min={1}
           max={100}
           step={1}
-          onValueChange={(newRange) => setPriceRange([newRange[0], newRange[1]])}
+          onValueChange={(newRange) =>
+            onChangeFilters({ priceRange: [newRange[0], newRange[1]] })
+          }
         />
       </div>
     </div>
