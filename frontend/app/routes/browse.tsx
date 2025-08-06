@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Slider } from "../components/ui/slider";
 
 export default function BrowseBooks() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
 
   const handleGenreClick = (genre) => {
     setSelectedGenre(prev => (prev === genre ? null : genre));
@@ -10,7 +12,7 @@ export default function BrowseBooks() {
 
   return (
     <div className="grid grid-cols-24 lg:grid-cols-6 gap-4">
-      <div className="col-span-11 lg:col-span-2 m-5 relative">
+      <div className="col-span-11 lg:col-span-2 m-5 relative select-none">
         <div
           className="space-y-8 px-6 py-12 my-5 mx-2.5 relative"
           style={{
@@ -55,7 +57,7 @@ export default function BrowseBooks() {
                 const isSelected = selectedGenre === genre;
 
                 return (
-                  <div className="ml-3 select-none">
+                  <div className="ml-3">
                     <label
                       key={i}
                       className={`cursor-pointer transition
@@ -84,9 +86,18 @@ export default function BrowseBooks() {
             </div>
           </div>
 
-          <div>
+          <div className="mb-8">
             <h2 className="text-lg mb-2 font-[Eagle_Lake]">III. Price Range</h2>
-            {/* Placeholder for price slider */}
+            <div className="ml-8 mb-2">
+              ${priceRange[0]} – ${priceRange[1]}
+            </div>
+            <Slider
+              defaultValue={priceRange}
+              min={1}
+              max={100}
+              step={1}
+              onValueChange={(newRange) => setPriceRange([newRange[0], newRange[1]])}
+            />
           </div>
         </div>
       </div>
