@@ -43,7 +43,7 @@ export default function BookFilters({
 
   return (
     <div
-      className="space-y-8 px-6 py-12 my-5 mx-2.5 relative select-none"
+      className="space-y-8 px-6 pt-8 my-5 mx-2.5 relative select-none"
       style={{
         aspectRatio: "768 / 1064",
         borderStyle: "solid",
@@ -56,13 +56,12 @@ export default function BookFilters({
         backgroundColor: "#fdf8eb",
       }}
     >
-      <div className="col-span-13 lg:col-span-4">
-        <h1 className="text-5xl text-center font-[Great_Vibes]">Filters</h1>
-      </div>
+     
+      <h1 className="mb-4 text-5xl text-center font-[Great_Vibes]">Filters</h1>
 
       {/* Search */}
       <div>
-        <h2 className="text-lg mb-2 font-[Eagle_Lake]">I. What are you looking for?</h2>
+        <h2 className="text-md mb-2 font-[Eagle_Lake]">I. What are you looking for?</h2>
         <div className="relative w-full bg-[#FFFAF0] shadow-sm">
           <input
             type="text"
@@ -88,8 +87,8 @@ export default function BookFilters({
 
       {/* Genre */}
       <div>
-        <h2 className="text-lg mb-2 font-[Eagle_Lake]">II. Genre</h2>
-        <div className="space-y-2 font-serif text-[#5B4636]">
+        <h2 className="text-md mb-2 font-[Eagle_Lake]">II. Genre</h2>
+        <div className="space-y-2 font-serif text-[#5B4636] text-sm">
           {["Fantasy", "Mystery", "Romance", "Sci-Fi", "Dystopian", "Thriller", "Horror", "Historical", "Non-fiction"].map((genre, i) => {
             const letter = String.fromCharCode(97 + i);
             const isSelected = selectedGenre === genre;
@@ -126,20 +125,22 @@ export default function BookFilters({
 
       {/* Price Range */}
       <div className="mb-8">
-        <h2 className="text-lg mb-2 font-[Eagle_Lake]">III. Price Range</h2>
+        <h2 className="text-md mb-2 font-[Eagle_Lake]">III. Price Range</h2>
         <div className="ml-8 mb-2 font-serif text-[#5B4636]">
           ${localPriceRange[0]} – ${localPriceRange[1]}
         </div>
-        <Slider
-          value={localPriceRange}
-          min={0}
-          max={100}
-          step={1}
-          onValueChange={(newRange) => setLocalPriceRange(newRange)}
-          onValueCommit={(newRange) =>
-            onChangeFilters({ priceRange: [newRange[0], newRange[1]] })
-          }
-        />
+        <div className="mx-auto w-[82%]">
+          <Slider
+            value={localPriceRange}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(newRange) => setLocalPriceRange(newRange)}
+            onValueCommit={(newRange) =>
+              onChangeFilters({ priceRange: [newRange[0], newRange[1]] })
+            }
+          />
+        </div>
       </div>
     </div>
   );

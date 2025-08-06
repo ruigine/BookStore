@@ -13,28 +13,60 @@ export default function BrowseBooks() {
   const priceRange: [number, number] = [minPrice, maxPrice];
 
   const [books, setBooks] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
-    const url = `${SERVICE_URLS.BOOKS}/books?${searchParams.toString()}`;
+    setPage(1);
+    setHasMore(true);
+  }, [searchParams]);
 
-    const fetchBooks = async () => {
+  useEffect(() => {
+    const url = `${SERVICE_URLS.BOOKS}/books?${searchParams.toString()}&page=${page}`;
+
+    const fetchBooks = async () => {  
       try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch");
-        const data = await response.json();
-        setBooks(data.data);
-        console.log(data);
+        if (page == 1 || hasMore) {
+          const response = await fetch(url);
+  
+          if (!response.ok) throw new Error("Failed to fetch");
+          const data = await response.json();
+  
+          setBooks(prevBooks =>
+            page === 1 ? data.data : [...prevBooks, ...data.data]
+          );
+
+          setHasMore(data.pagination["has_more"])
+  
+          console.log(data);
+        }
       } catch (err) {
         console.error("Error fetching books:", err);
       }
     };
 
     fetchBooks();
-  }, [searchParams]);
+  }, [searchParams, page]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+      
+      if (Math.round(scrollTop + windowHeight) == fullHeight) {
+        setPage((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="grid grid-cols-24 lg:grid-cols-6 gap-4">
       <div className="col-span-11 lg:col-span-2 m-5 relative select-none">
+        <div className="sticky top-10 left-0">
         <BookFilters
           searchTerm={searchTerm}
           selectedGenre={selectedGenre}
@@ -66,6 +98,7 @@ export default function BrowseBooks() {
 
           }}
         />
+        </div>
       </div>
 
       <div className="col-span-13 lg:col-span-4">
