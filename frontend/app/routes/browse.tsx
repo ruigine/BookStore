@@ -42,18 +42,28 @@ export default function BrowseBooks() {
           onChangeFilters={(updated) => {
             setSearchParams((prev) => {
               const newParams = new URLSearchParams(prev);
-              if (updated.searchTerm !== undefined)
-                newParams.set("search", updated.searchTerm);
-              if (updated.selectedGenre !== undefined)
+
+              if ("searchTerm" in updated) {
+                updated.searchTerm?.trim()
+                  ? newParams.set("search", updated.searchTerm)
+                  : newParams.delete("search");
+              }
+
+              if ("selectedGenre" in updated) {
                 updated.selectedGenre
                   ? newParams.set("genre", updated.selectedGenre)
                   : newParams.delete("genre");
-              if (updated.priceRange !== undefined) {
-                newParams.set("min_price", updated.priceRange[0].toString());
-                newParams.set("max_price", updated.priceRange[1].toString());
               }
+
+              if ("priceRange" in updated) {
+                const [min, max] = updated.priceRange!;
+                newParams.set("min_price", min.toString());
+                newParams.set("max_price", max.toString());
+              }
+
               return newParams;
             });
+
           }}
         />
       </div>

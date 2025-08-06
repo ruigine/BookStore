@@ -63,7 +63,7 @@ export default function BookFilters({
           <button
             type="submit"
             onClick={() => onChangeFilters({ searchTerm: searchInput })}
-            className="absolute top-0 right-0 h-full px-4 py-2 text-[#5B4636] font-serif italic bg-[#FFFAF0] hover:bg-[#f3e8d7] transition-colors"
+            className="cursor-pointer absolute top-0 right-0 h-full px-4 py-2 text-[#5B4636] font-serif italic bg-[#FFFAF0] hover:bg-[#f3e8d7] transition-colors"
           >
             Search
           </button>
