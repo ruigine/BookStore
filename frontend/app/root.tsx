@@ -22,6 +22,14 @@ export const links: Route.LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Rosarivo:ital@0;1&display=swap",
   },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Eagle+Lake&display=swap",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap",
+  },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -46,7 +54,6 @@ export default function App() {
   return (
     <>
       <NavBar />
-      <div style={{ height: "100vh" }}>hi</div>
       <Outlet />
     </>
   );
