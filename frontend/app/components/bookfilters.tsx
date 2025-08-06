@@ -24,6 +24,12 @@ export default function BookFilters({
     setSearchInput(searchTerm);
   }, [searchTerm]);
 
+  useEffect(() => {
+    if (searchInput.trim() === "") {
+        onChangeFilters({ searchTerm: "" });
+    }
+  }, [searchInput]);
+
   const handleGenreClick = (genre: string) => {
     onChangeFilters({
       selectedGenre: selectedGenre === genre ? null : genre,
@@ -58,6 +64,11 @@ export default function BookFilters({
             placeholder="Search by title, author, ISBN..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                    onChangeFilters({ searchTerm: searchInput });
+                }
+            }}
             className="w-full pr-20 px-4 py-2 bg-transparent text-[#5B4636] placeholder-[#A89B87] italic font-serif focus:outline-none"
           />
           <button
@@ -91,7 +102,7 @@ export default function BookFilters({
                     value={genre}
                     className="hidden"
                     checked={isSelected}
-                    onChange={() => handleGenreClick(genre)}
+                    onClick={() => handleGenreClick(genre)}
                   />
                   <span
                     className={`mr-2 p-1 text-center border-[#CBB994] rounded-full text-sm italic ${
