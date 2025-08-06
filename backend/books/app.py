@@ -40,7 +40,7 @@ def get_books():
 
         # Pagination
         page = request.args.get('page', 1, type=int)
-        limit = request.args.get('limit', 10, type=int)
+        limit = request.args.get('limit', 8, type=int)
         offset = (page - 1) * limit
 
         total_books = query.count()
