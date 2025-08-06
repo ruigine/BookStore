@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Slider } from "./ui/slider";
 
 interface BookFiltersProps {
@@ -17,6 +18,7 @@ export default function BookFilters({
   priceRange,
   setPriceRange,
 }: BookFiltersProps) {
+const [searchInput, setSearchInput] = useState("");
   const handleGenreClick = (genre: string) => {
     setSelectedGenre((prev: string | null) => (prev === genre ? null : genre));
   };
@@ -47,12 +49,13 @@ export default function BookFilters({
           <input
             type="text"
             placeholder="Search by title, author, ISBN..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="w-full pr-20 px-4 py-2 bg-transparent text-[#5B4636] placeholder-[#A89B87] italic font-serif focus:outline-none"
           />
           <button
             type="submit"
+            onClick={() => setSearchTerm(searchInput)}
             className="absolute top-0 right-0 h-full px-4 py-2 text-[#5B4636] font-serif italic bg-[#FFFAF0] hover:bg-[#f3e8d7] transition-colors"
           >
             Search
