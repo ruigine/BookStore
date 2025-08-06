@@ -16,6 +16,17 @@ export default function BrowseBooks() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
+  const handleScroll = () => {
+    const scrollTop = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const fullHeight = document.documentElement.scrollHeight;
+    
+    if (scrollTop + windowHeight >= fullHeight - 5) {
+      window.removeEventListener("scroll", handleScroll);
+      setPage((prev) => prev + 1);
+    }
+  };
+
   useEffect(() => {
     setPage(1);
     setHasMore(true);
@@ -32,6 +43,8 @@ export default function BrowseBooks() {
           if (!response.ok) throw new Error("Failed to fetch");
           const data = await response.json();
   
+          window.addEventListener("scroll", handleScroll);
+
           setBooks(prevBooks =>
             page === 1 ? data.data : [...prevBooks, ...data.data]
           );
@@ -49,16 +62,6 @@ export default function BrowseBooks() {
   }, [searchParams, page]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
-      
-      if (Math.round(scrollTop + windowHeight) == fullHeight) {
-        setPage((prev) => prev + 1);
-      }
-    };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
