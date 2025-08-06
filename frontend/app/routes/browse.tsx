@@ -69,14 +69,14 @@ export default function BrowseBooks() {
       </div>
 
       <div className="col-span-13 lg:col-span-4">
-        <h1 className="text-xl font-semibold text-center mt-9">Browse Books</h1>
+        <h1 className="text-4xl text-center mt-9 font-[Great_Vibes]">— Browse Books —</h1>
 
         {Array.isArray(books) && books.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
             {books.map((book: any) => (
               <div
                 key={book.book_id}
-                className="group p-4 text-center text-sm text-stone-700"
+                className="group p-4 text-center text-sm text-stone-700 border border-[#eedab8] rounded-xl "
               >
                 <div className="relative w-[140px] h-[200px] mb-6 [perspective:1000px] mx-auto">
                   <div className="h-full w-full relative transition-transform duration-500 group-hover:rotate-y-[18deg] group-hover:scale-[1.04] transform-style-preserve-3d">
@@ -105,7 +105,7 @@ export default function BrowseBooks() {
                 </div>
 
                 <h2
-                  className="mb-2 truncate"
+                  className="mb-2 truncate group-hover:underline"
                   title={book.title}
                 >
                   {book.title}
