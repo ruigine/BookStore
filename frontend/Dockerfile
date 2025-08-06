@@ -1,31 +1,29 @@
-FROM node:20-alpine
+# --- Build stage ---
+FROM node:20-alpine AS builder
+
 WORKDIR /app
+
+# Install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
+
+# Copy source files
 COPY . .
+
+# Build the SPA (ensure ssr: false in react-router.config.ts)
 RUN npm run build
-EXPOSE 3000
-CMD ["npm", "run", "start"]
 
-# FROM node:20-alpine AS development-dependencies-env
-# COPY . /app
-# WORKDIR /app
-# RUN npm ci
+# --- Serve with Nginx ---
+FROM nginx:alpine
 
-# FROM node:20-alpine AS production-dependencies-env
-# COPY ./package.json package-lock.json /app/
-# WORKDIR /app
-# RUN npm ci --omit=dev
+# Copy built frontend from builder stage
+COPY --from=builder /app/build/client /usr/share/nginx/html
 
-# FROM node:20-alpine AS build-env
-# COPY . /app/
-# COPY --from=development-dependencies-env /app/node_modules /app/node_modules
-# WORKDIR /app
-# RUN npm run build
+# Copy custom nginx config
+COPY default.conf /etc/nginx/conf.d/default.conf
 
-# FROM node:20-alpine
-# COPY ./package.json package-lock.json /app/
-# COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-# COPY --from=build-env /app/build /app/build
-# WORKDIR /app
-# CMD ["npm", "run", "start"]
+# Expose default HTTP port
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

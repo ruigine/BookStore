@@ -85,7 +85,7 @@ export default function BookFilters({
       <div>
         <h2 className="text-lg mb-2 font-[Eagle_Lake]">II. Genre</h2>
         <div className="space-y-2 font-serif text-[#5B4636]">
-          {["Fantasy", "Mystery", "Romance", "Sci-Fi", "Non-fiction"].map((genre, i) => {
+          {["Fantasy", "Mystery", "Romance", "Sci-Fi", "Dystopian", "Thriller", "Horror", "Historical", "Non-fiction"].map((genre, i) => {
             const letter = String.fromCharCode(97 + i);
             const isSelected = selectedGenre === genre;
 
