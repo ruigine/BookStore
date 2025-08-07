@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import BookFilters from "../components/bookfilters";
 import { SERVICE_URLS } from "../src/constants";
 import { Menu, Search, ChevronUp, ChevronDown } from "lucide-react";
@@ -81,11 +81,6 @@ export default function BrowseBooks() {
 
     fetchBooks();
   }, [searchParams, page]);
-
-  // useEffect(() => {
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, []);
 
   return (
     <div className="grid md:grid-cols-24 lg:grid-cols-6 gap-4">
@@ -200,7 +195,7 @@ export default function BrowseBooks() {
         {Array.isArray(books) && books.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 p-6">
             {books.map((book: any) => (
-              <div
+              <Link to={`/books/${book.book_id}`}
                 key={book.book_id}
                 className="group py-4 -mx-1 text-center text-sm text-stone-700 border border-[#eedab8] rounded-xl w-full"
               >
@@ -211,7 +206,7 @@ export default function BrowseBooks() {
                     <img
                       src={book.url}
                       alt={book.title}
-                      className="h-full w-full object-cover hover:rounded-tr-md hover:rounded-br-md rounded-tl-none rounded-bl-none hover:shadow-xl relative z-10 transition-all duration-500"
+                      className="h-full w-full object-cover hover:rounded-tr-md hover:rounded-br-md rounded-tl-none rounded-bl-none group-hover:shadow-xl relative z-10 transition-all duration-500"
                     />
 
                     {/* Spine */}
@@ -238,7 +233,7 @@ export default function BrowseBooks() {
                 </h2>
                 <p className="italic text-[0.90rem] text-stone-500 mb-1 px-2">by {book.authors}</p>
                 <p className="text-sm mb-2 text-green-700">${book.price}</p>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

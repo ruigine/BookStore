@@ -120,7 +120,7 @@ export default function NavBar() {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 text-green-800 focus:outline-none">
+              <button className="flex items-center gap-2 text-green-800 focus:outline-none cursor-pointer">
                 <User size={16} />
                 <span>{user?.name || user?.email}</span>
               </button>
