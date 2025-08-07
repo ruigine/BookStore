@@ -106,7 +106,7 @@ export default function BookFilters({
                     value={genre}
                     className="hidden"
                     checked={isSelected}
-                    onClick={() => handleGenreClick(genre)}
+                    onChange={() => handleGenreClick(genre)}
                   />
                   <span
                     className={`mr-2 p-1 text-center border-[#CBB994] rounded-full text-sm italic ${
@@ -135,7 +135,7 @@ export default function BookFilters({
             min={0}
             max={100}
             step={1}
-            onValueChange={(newRange) => setLocalPriceRange(newRange)}
+            onValueChange={(newRange) => setLocalPriceRange(newRange as [number, number])}
             onValueCommit={(newRange) =>
               onChangeFilters({ priceRange: [newRange[0], newRange[1]] })
             }

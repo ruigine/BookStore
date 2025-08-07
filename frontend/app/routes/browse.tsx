@@ -1,8 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
 import BookFilters from "../components/bookfilters";
 import { SERVICE_URLS } from "../src/constants";
 import { Menu, Search, ChevronUp, ChevronDown } from "lucide-react";
+
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "../components/ui/sheet";
 
 export default function BrowseBooks() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,13 +28,19 @@ export default function BrowseBooks() {
 
   const [opened, setOpened] = useState(false);
 
+  const scrollAttached = useRef(false);
+
   const handleScroll = () => {
     const scrollTop = window.scrollY;
     const windowHeight = window.innerHeight;
     const fullHeight = document.documentElement.scrollHeight;
     
     if (scrollTop + windowHeight >= fullHeight - 5) {
-      window.removeEventListener("scroll", handleScroll);
+      if (scrollAttached.current) {
+        window.removeEventListener("scroll", handleScroll);
+        scrollAttached.current = false;
+      }
+
       setPage((prev) => prev + 1);
     }
   };
@@ -45,16 +60,19 @@ export default function BrowseBooks() {
   
           if (!response.ok) throw new Error("Failed to fetch");
           const data = await response.json();
-  
-          window.addEventListener("scroll", handleScroll);
+          
+          if (!scrollAttached.current) {
+            window.addEventListener("scroll", handleScroll);
+            scrollAttached.current = true;
+          }
 
           setBooks(prevBooks =>
             page === 1 ? data.data : [...prevBooks, ...data.data]
           );
 
           setHasMore(data.pagination["has_more"])
-  
-          console.log(data);
+          
+          console.log(url, data);
         }
       } catch (err) {
         console.error("Error fetching books:", err);
@@ -64,66 +82,118 @@ export default function BrowseBooks() {
     fetchBooks();
   }, [searchParams, page]);
 
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  // useEffect(() => {
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
 
   return (
     <div className="grid md:grid-cols-24 lg:grid-cols-6 gap-4">
       <div className="hidden md:block md:col-span-11 lg:col-span-2 m-5 relative select-none">
-        <div className="sticky top-10 left-0">
-        <BookFilters
-          searchTerm={searchTerm}
-          selectedGenre={selectedGenre}
-          priceRange={priceRange}
-          onChangeFilters={(updated) => {
-            setSearchParams((prev) => {
-              const newParams = new URLSearchParams(prev);
+        {!opened && (
+          <div className="sticky top-10 left-0">
+            <BookFilters
+              searchTerm={searchTerm}
+              selectedGenre={selectedGenre}
+              priceRange={priceRange}
+              onChangeFilters={(updated) => {
+                setSearchParams((prev) => {
+                  const newParams = new URLSearchParams(prev);
 
-              if ("searchTerm" in updated) {
-                updated.searchTerm?.trim()
-                  ? newParams.set("search", updated.searchTerm)
-                  : newParams.delete("search");
-              }
+                  if ("searchTerm" in updated) {
+                    updated.searchTerm?.trim()
+                      ? newParams.set("search", updated.searchTerm)
+                      : newParams.delete("search");
+                  }
 
-              if ("selectedGenre" in updated) {
-                updated.selectedGenre
-                  ? newParams.set("genre", updated.selectedGenre)
-                  : newParams.delete("genre");
-              }
+                  if ("selectedGenre" in updated) {
+                    updated.selectedGenre
+                      ? newParams.set("genre", updated.selectedGenre)
+                      : newParams.delete("genre");
+                  }
 
-              if ("priceRange" in updated) {
-                const [min, max] = updated.priceRange!;
-                newParams.set("min_price", min.toString());
-                newParams.set("max_price", max.toString());
-              }
+                  if ("priceRange" in updated) {
+                    const [min, max] = updated.priceRange!;
+                    newParams.set("min_price", min.toString());
+                    newParams.set("max_price", max.toString());
+                  }
 
-              return newParams;
-            });
+                  return newParams;
+                });
 
-          }}
-        />
-        </div>
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="col-span-13 lg:col-span-4">
-        <div
-          className="md:hidden pl-10 py-3 w-full sticky top-13 z-40 text-white"
-          style={{
-            backgroundImage: "url('/images/green-noise.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <div
-            className="flex items-center gap-1 cursor-pointer hover:underline hover:italic w-fit select-none"
-            onClick={() => setOpened(!opened)}
+        <Sheet onOpenChange={setOpened}>
+          <div 
+            className="md:hidden pl-10 py-3 w-full sticky top-13 z-40 text-white"
+            style={{
+              backgroundImage: "url('/images/green-noise.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
           >
-            <span>Filters</span>
-            {opened ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            <SheetTrigger
+              className="flex items-center gap-1 cursor-pointer hover:underline hover:italic w-fit select-none"
+              onClick={() => setOpened(!opened)}
+            >
+              <span>Filters</span>
+              {opened ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </SheetTrigger>
           </div>
-        </div>
+
+          <SheetContent side="left" className="bg-[#FDF8EB] h-[110vh]"
+            // style={{
+            //   backgroundImage: "url('/images/green-noise.png')",
+            //   backgroundSize: "cover",
+            //   backgroundPosition: "center",
+            // }}
+          >
+            <SheetHeader className="hidden">
+              <SheetTitle>Filters</SheetTitle>
+              <SheetDescription>
+                Adjust your search filters here
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="overflow-y-auto">
+              <BookFilters
+                searchTerm={searchTerm}
+                selectedGenre={selectedGenre}
+                priceRange={priceRange}
+                onChangeFilters={(updated) => {
+                  setSearchParams((prev) => {
+                    const newParams = new URLSearchParams(prev);
+                    
+                    if ("searchTerm" in updated) {
+                      updated.searchTerm?.trim()
+                      ? newParams.set("search", updated.searchTerm)
+                      : newParams.delete("search");
+                    }
+                    
+                    if ("selectedGenre" in updated) {
+                      updated.selectedGenre
+                      ? newParams.set("genre", updated.selectedGenre)
+                      : newParams.delete("genre");
+                    }
+                    
+                    if ("priceRange" in updated) {
+                      const [min, max] = updated.priceRange!;
+                      newParams.set("min_price", min.toString());
+                      newParams.set("max_price", max.toString());
+                    }
+                    
+                    return newParams;
+                  });
+                }}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
 
         <h1 className="text-4xl text-center mt-9 font-[Great_Vibes]">— Browse Books —</h1>
 
