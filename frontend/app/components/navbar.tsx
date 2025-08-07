@@ -7,7 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "../components/ui/sheet"; // adjust import if needed
+} from "../components/ui/sheet";
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
@@ -87,12 +87,20 @@ export default function NavBar() {
 
         {/* Right: Full nav (md+) */}
         <div className="hidden md:flex gap-6 text-stone-600 flex-1 justify-end">
-          <Link to="/account" className="hover:underline hover:italic">III. Account</Link>
+          <Link to="/login" className={`block group transition-all ${
+            useLocation().pathname === "/login"
+              ? "underline decoration-gray-300e"
+              : "hover:underline hover:italic decoration-gray-300"
+          }`}>III. Log in</Link>
         </div>
 
         {/* Right: Mobile (below md) */}
         <div className="flex md:hidden flex-1 justify-end gap-4 text-stone-600">
-          <Link to="/account" className="hover:underline hover:italic">Account</Link>
+          <Link to="/login" className={`block group transition-all ${
+            useLocation().pathname === "/login"
+              ? "underline decoration-gray-300e"
+              : "hover:underline hover:italic decoration-gray-300"
+          }`}>Log in</Link>
         </div>
 
       </nav>
