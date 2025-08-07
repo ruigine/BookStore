@@ -106,6 +106,7 @@ def login():
 
         access_token = jwt.encode({
             "sub": str(user.user_id),
+            "name": user.username,
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
             "type": "access"
@@ -113,6 +114,7 @@ def login():
 
         refresh_token = jwt.encode({
             "sub": str(user.user_id),
+            "name": user.username,
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(hours=24),
             "type": "refresh"
@@ -181,6 +183,7 @@ def refresh_token():
 
         new_access_token = jwt.encode({
             "sub": str(user.user_id),
+            "name": user.username,
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
             "type": "access"
@@ -188,6 +191,7 @@ def refresh_token():
 
         new_refresh_token = jwt.encode({
             "sub": str(user.user_id),
+            "name": user.username,
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(hours=24),
             "type": "refresh"

@@ -1,4 +1,4 @@
-import { LoginForm } from "~/components/login-form"
+import { SignUpForm } from "~/components/signup-form"
 
 export default function Page() {
   return (
@@ -8,7 +8,7 @@ export default function Page() {
       }}
     >
       <div className="w-full max-w-sm">
-        <LoginForm />
+        <SignUpForm />
       </div>
     </div>
   )

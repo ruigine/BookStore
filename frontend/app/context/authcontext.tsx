@@ -1,12 +1,21 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { SERVICE_URLS } from "../src/constants";
+import { jwtDecode } from "jwt-decode"
+import { useNavigate } from "react-router";
+
+type UserPayload = {
+  sub: string
+  email?: string
+  [key: string]: any
+}
 
 type AuthContextType = {
   token: string | null
+  user: UserPayload | null
   login: (email: string, password: string) => Promise<boolean>
   logout: () => void
   signup: (email: string, password: string, username: string) => Promise<boolean>
-  tokenReady: boolean
+  tokenReady: boolean,
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -14,6 +23,8 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null)
   const [tokenReady, setTokenReady] = useState(false)
+  const [user, setUser] = useState<UserPayload | null>(null)
+  const navigate = useNavigate()
 
   // Refresh token on mount (from HttpOnly cookie)
   useEffect(() => {
@@ -27,8 +38,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const data = await res.json()
         if (res.ok) {
           setToken(data.access_token)
+          setUser(jwtDecode(data.access_token))
         } else {
           setToken(null)
+          setUser(null)
         }
       } catch (err) {
         setToken(null)
@@ -52,6 +65,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await res.json()
       if (res.ok) {
         setToken(data.access_token)
+        setUser(jwtDecode(data.access_token))
+        console.log("user:", user);
         return true
       } else {
         return false
@@ -67,6 +82,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       credentials: "include"
     })
     setToken(null)
+    setUser(null)
+    navigate("/login")
   }
 
   const signup = async (username: string, email: string, password: string) => {
@@ -85,7 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, signup, tokenReady }}>
+    <AuthContext.Provider value={{ token, user, login, logout, signup, tokenReady }}>
       {children}
     </AuthContext.Provider>
   )

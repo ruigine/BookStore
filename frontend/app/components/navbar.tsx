@@ -1,6 +1,8 @@
 import { Link, useLocation } from "react-router";
-import { Menu } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "~/context/authcontext";
+
 import {
   Sheet,
   SheetContent,
@@ -9,8 +11,16 @@ import {
   SheetTrigger,
 } from "../components/ui/sheet";
 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "~/components/ui/dropdown-menu"
+
 export default function NavBar() {
   const [open, setOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header className="w-full bg-[#FFFAED] py-4 px-6 font-serif text-sm tracking-wide sticky top-0 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.035),_0_4px_6px_-4px_rgba(0,0,0,0.025)] z-50">
@@ -22,9 +32,9 @@ export default function NavBar() {
             I. Browse books
           </Link>
 
-          <Link to="/orders" className={`hover:underline hover:italic ${useLocation().pathname === "/orders" && "italic underline text-green-800"}`}>
+          {user && (<Link to="/orders" className={`hover:underline hover:italic ${useLocation().pathname === "/orders" && "italic underline text-green-800"}`}>
             II. My orders
-          </Link>
+          </Link>)}
         </div>
 
         {/* Left: Mobile menu icon (below md) */}
@@ -63,7 +73,7 @@ export default function NavBar() {
                   <div className="text-lg">Browse Books ---------- 1</div>
                 </Link>
 
-                <Link
+                {user && (<Link
                   to="/orders"
                   onClick={() => setOpen(false)}
                   className={`block group transition-all ${
@@ -74,7 +84,7 @@ export default function NavBar() {
                 >
                   <div className="uppercase text-xs tracking-wider text-stone-600">Chapter II</div>
                   <div className="text-lg">My Orders -------------- 2</div>
-                </Link>
+                </Link>)}
               </nav>
             </SheetContent>
           </Sheet>
@@ -84,17 +94,20 @@ export default function NavBar() {
         <div className="absolute left-1/2 transform -translate-x-1/2 text-xl uppercase tracking-widest font-medium">
           Bookstore
         </div>
-
-        {/* Right: Full nav (md+) */}
+        
+        {!user && (
+        /* Right: Full nav (md+) */
         <div className="hidden md:flex gap-6 text-stone-600 flex-1 justify-end">
           <Link to="/login" className={`block group transition-all ${
             useLocation().pathname === "/login"
               ? "underline decoration-gray-300e"
               : "hover:underline hover:italic decoration-gray-300"
-          }`}>III. Log in</Link>
+          }`}>II. Log in</Link>
         </div>
+        )}
 
-        {/* Right: Mobile (below md) */}
+        {!user && (
+        /* Right: Mobile (below md) */
         <div className="flex md:hidden flex-1 justify-end gap-4 text-stone-600">
           <Link to="/login" className={`block group transition-all ${
             useLocation().pathname === "/login"
@@ -102,7 +115,34 @@ export default function NavBar() {
               : "hover:underline hover:italic decoration-gray-300"
           }`}>Log in</Link>
         </div>
+        )}
 
+        {user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 text-green-800 focus:outline-none">
+                <User size={16} />
+                <span>{user?.name || user?.email}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="text-white"
+              style={{
+                backgroundImage: "url('/images/green-noise.png')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <DropdownMenuItem
+                onClick={() => {
+                  logout()
+                }}
+                className="cursor-pointer !text-white !bg-transparent hover:!bg-white/10"
+              >
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </nav>
     </header>
   );
