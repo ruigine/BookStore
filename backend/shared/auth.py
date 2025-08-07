@@ -7,6 +7,8 @@ SECRET_KEY = environ.get('JWT_SECRET_KEY')
 def verify_jwt(token):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        if payload.get("type") != "access":
+            return {"error": "Invalid token type"}
         return payload
     except jwt.ExpiredSignatureError:
         return {"error": "Token has expired"}
