@@ -16,6 +16,10 @@ type AuthContextType = {
   logout: () => void
   signup: (email: string, password: string, username: string) => Promise<boolean>
   tokenReady: boolean,
+  fetchWithAuth: (
+    input: RequestInfo | URL,
+    init?: RequestInit
+  ) => Promise<Response>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -101,8 +105,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  const fetchWithAuth = async (
+    input: RequestInfo | URL,
+    init: RequestInit = {}
+  ): Promise<Response> => {
+    if (!token) {
+      throw new Error("No token available")
+    }
+
+    // 1. Attempt request with current token
+    let res = await fetch(input, {
+      ...init,
+      headers: {
+        ...init.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    // 2. If unauthorized, try refreshing token
+    if (res.status === 401) {
+      try {
+        const refreshRes = await fetch(`${SERVICE_URLS.USERS}/refresh-token`, {
+          method: "POST",
+          credentials: "include",
+        })
+        const refreshData = await refreshRes.json()
+
+        if (refreshRes.ok) {
+          setToken(refreshData.access_token)
+          setUser(jwtDecode(refreshData.access_token))
+
+          // Retry original request with new token
+          res = await fetch(input, {
+            ...init,
+            headers: {
+              ...init.headers,
+              Authorization: `Bearer ${refreshData.access_token}`,
+            },
+          })
+        } else {
+          logout()
+          throw new Error("Token refresh failed")
+        }
+      } catch (err) {
+        logout()
+        throw new Error("Error refreshing token")
+      }
+    }
+
+    return res
+  }
+
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, signup, tokenReady }}>
+    <AuthContext.Provider value={{ token, user, login, logout, signup, tokenReady, fetchWithAuth }}>
       {children}
     </AuthContext.Provider>
   )
