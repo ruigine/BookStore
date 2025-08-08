@@ -189,9 +189,10 @@ export default function BrowseBooks() {
         {Array.isArray(books) && books.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 px-4">
             {books.map((book: any) => (
-              <Link to={`/books/${book.book_id}`}
+              <Link
+                to={`/books/${book.book_id}`}
                 key={book.book_id}
-                className="group text-center text-sm border border-[#eedab8] rounded-xl p-4 hover:shadow-md transition-all"
+                className="group text-center text-sm rounded-xl p-4 hover:shadow-md transition-all border border-[#d7b87a] bg-[linear-gradient(145deg,#fffaf0,#fef4d7)] shadow-[0_2px_6px_rgba(215,184,122,0.2)]"
               >
                 <div className="w-max-full w-[140px] h-[200px] mb-6 [perspective:1000px] mx-auto">
                   <div className="h-full w-full relative transition-transform duration-500 group-hover:rotate-y-[18deg] group-hover:scale-[1.04] transform-style-preserve-3d">
