@@ -57,7 +57,7 @@ export function SignUpForm({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button className="mx-auto bg-[#685835]" onClick={handleContinue}>
+            <Button className="mx-auto bg-[#99A98B] hover:bg-[#7e9967] hover:cursor-pointer" onClick={handleContinue}>
               Continue
             </Button>
           </DialogFooter>
