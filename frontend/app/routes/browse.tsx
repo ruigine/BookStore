@@ -232,7 +232,17 @@ export default function BrowseBooks() {
             ))}
           </div>
         ) : (
-          <p className="text-center mt-6 text-gray-500">No books found.</p>
+          <div className="text-center mt-12 text-[#5B4636] font-serif px-4">
+            <h2 className="text-xl font-semibold tracking-wide">No Books Found</h2>
+            <p className="italic text-stone-500 mt-1 text-sm">
+              Try adjusting your filters or searching a different title.
+            </p>
+            <div className="flex items-center justify-center gap-4 mt-11 text-[#c5bca4] text-xl select-none">
+              <span className="border-t border-[#c5bca4] w-10" />
+              ❧
+              <span className="border-t border-[#c5bca4] w-10" />
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -11,6 +11,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import NavBar from "./components/navbar";
 import { AuthProvider } from "./context/authcontext"
+import { Link } from "react-router"
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -77,14 +78,24 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
+    <main className="h-screen flex items-center justify-center text-center text-[#5B4636]">
+      <div>
+        <h1 className="text-5xl font-[Eagle_Lake]">404</h1>
+        <div className="flex items-center justify-center gap-4 my-4 text-[#c5bca4] text-xl select-none">
+          <span className="border-t border-[#c5bca4] w-10" />
+            ❧
+          <span className="border-t border-[#c5bca4] w-10" />
+        </div>
+        <p className="font-serif text-xl italic">
+          Like a missing chapter, this page doesn’t exist.
+        </p>
+        <Link
+          to="/browse"
+          className="inline-block mt-6 border border-green-900 px-4 py-2 rounded hover:bg-[#5a7249] hover:text-white font-serif"
+        >
+          ↩ Back to Bookstore
+        </Link>
+      </div>
     </main>
   );
 }

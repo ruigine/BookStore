@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router"
+import { Link, useParams } from "react-router"
 import { SERVICE_URLS } from "~/src/constants"
 import { Loader } from "lucide-react"
 import { Button } from "~/components/ui/button"
@@ -172,7 +172,25 @@ export default function BookDetail() {
   }
 
   if (!book) {
-    return <div className="text-center text-red-600 mt-10">Book not found.</div>
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-[#5B4636] font-serif px-6 text-center -mt-[52px]">
+        <div className="flex items-center justify-center gap-4 mb-4 text-[#c5bca4] text-xl select-none">
+          <span className="border-t border-[#c5bca4] w-10" />
+          ❧
+          <span className="border-t border-[#c5bca4] w-10" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-wider">Book Not Found</h1>
+        <p className="italic text-stone-500 mt-2">
+          We searched the shelves... but couldn't find this title.
+        </p>
+        <Link
+          to="/browse"
+          className="mt-6 text-[#5a7249] hover:underline text-sm tracking-wide"
+        >
+          ← Return to Browse
+        </Link>
+      </div>
+    )
   }
 
   return (

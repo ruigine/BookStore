@@ -77,7 +77,7 @@ export default function MyOrdersPage() {
           <p className="italic text-[#857158] text-lg">Retrieving your personal order log...</p>
         </div>
       ) : orders.length === 0 ? (
-        <p className="text-center italic text-stone-500">No scrolls found in your ledger of orders.</p>
+        <p className="text-center italic text-stone-500">No orders found.</p>
       ) : (
         <div className="space-y-14">
           {orders.map((order) => (
