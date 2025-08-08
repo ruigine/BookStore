@@ -31,6 +31,35 @@ export default function BookDetail() {
   const [quantity, setQuantity] = useState(1)
   const [openValidationError, setOpenValidationError] = useState(false)
   const [validationMessage, setValidationMessage] = useState("")
+  const [hasPending, setHasPending] = useState(false)
+
+  function startPollingOrderStatus() {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetchWithAuth(`${SERVICE_URLS.PLACE_ORDER}/checkorder/${orderId}`)
+        const data = await res.json()
+
+        if (res.ok && data.data.status === "completed") {
+          fetchBook()
+          setOpenPlaced(false)
+          clearInterval(interval)
+          setOrderId(null)
+          setOrderCompleted(true)
+        } else if (data.data.status === "failed") {
+          setOpenPlaced(false)
+          clearInterval(interval)
+          setOrderId(null)
+          setValidationMessage("Your order could not be processed due to insufficient stock or a system error.")
+          setOpenValidationError(true)
+        }
+      } catch (err) {
+        console.error("Polling error:", err)
+        clearInterval(interval)
+      }
+    }, 2000)
+
+    return interval
+  }
 
   const fetchBook = async () => {
     const res = await fetch(`${SERVICE_URLS.BOOKS}/books/${id}`)
@@ -47,6 +76,7 @@ export default function BookDetail() {
     }
 
     setLoadingOrder(true)
+    setHasPending(true)
     try {
       const res = await fetchWithAuth(`${SERVICE_URLS.PLACE_ORDER}/placeorder`, {
         method: "POST",
@@ -79,7 +109,6 @@ export default function BookDetail() {
 
   useEffect(() => {
     if (!orderId) return
-    
     const interval = setInterval(async () => {
       try {
         const res = await fetchWithAuth(`${SERVICE_URLS.PLACE_ORDER}/checkorder/${orderId}`)
@@ -90,11 +119,13 @@ export default function BookDetail() {
           setOpenPlaced(false)
           clearInterval(interval)
           setOrderId(null)
+          setHasPending(false)
           setOrderCompleted(true)
         } else if (data.data.status === "failed") {
           setOpenPlaced(false)
           clearInterval(interval)
           setOrderId(null)
+          setHasPending(false)
           setValidationMessage("Your order could not be processed due to insufficient stock or a system error.")
           setOpenValidationError(true)
         }
@@ -109,6 +140,27 @@ export default function BookDetail() {
   useEffect(() => {
     fetchBook()
   }, [id])
+
+  useEffect(() => {
+    const checkPendingOrder = async () => {
+      if (!user || !id) return
+
+      try {
+        const res = await fetchWithAuth(`${SERVICE_URLS.PLACE_ORDER}/pendingorder/${id}`)
+        const data = await res.json()
+
+        if (res.ok && data.hasPending) {
+          setHasPending(true)
+          console.log(data)
+          setOrderId(data.data['order_id'])
+        }
+      } catch (err) {
+        console.error("Failed to check pending order", err)
+      }
+    }
+
+    checkPendingOrder()
+  }, [user, id])
 
   if (loading) {
     return (
@@ -189,8 +241,8 @@ export default function BookDetail() {
         </div>
         
         {/* Purchase */}
-        <div className={`mt-8 flex items-center gap-5 ${book.quantity === 0 ? "justify-center" : "justify-end"}`}>
-          {book.quantity > 0 && (
+        <div className={`mt-8 flex items-center gap-5 ${(book.quantity === 0 || hasPending) ? "justify-center" : "justify-end"}`}>
+          {(book.quantity > 0 && !hasPending) && (
           <label
             htmlFor="quantity"
             className="text-sm text-[#5B4636] font-medium tracking-wide"
@@ -198,7 +250,7 @@ export default function BookDetail() {
             Quantity:
           </label>)}
 
-          {book.quantity > 0 && (
+          {(book.quantity > 0 && !hasPending) && (
           <input
             type="number"
             id="quantity"
@@ -227,9 +279,13 @@ export default function BookDetail() {
               setOpenConfirm(true)
             }}
             className="disabled:bg-red-900 cursor-pointer px-6 py-2 rounded-none bg-[#5a7249] text-white uppercase tracking-wider hover:bg-[#465b3a] transition font-serif"
-            disabled={book.quantity === 0}
+            disabled={book.quantity === 0 || hasPending}
           >
-            {book.quantity === 0 ? "Out of Stock" : "Purchase"}
+            {book.quantity === 0
+              ? "Out of Stock"
+              : hasPending
+              ? "Order is processing"
+              : "Purchase"}
           </Button>
         </div>
 
