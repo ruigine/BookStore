@@ -101,12 +101,10 @@ export default function BookFilters({
                   }`}
                 >
                   <input
-                    type="radio"
-                    name="genre"
-                    value={genre}
-                    className="hidden"
+                    type="checkbox"
                     checked={isSelected}
                     onChange={() => handleGenreClick(genre)}
+                    className="hidden"
                   />
                   <span
                     className={`mr-2 p-1 text-center border-[#CBB994] rounded-full text-sm italic ${
