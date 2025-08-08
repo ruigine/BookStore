@@ -2,11 +2,92 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router"
 import { SERVICE_URLS } from "../src/constants"
 import { Loader } from "lucide-react"
+import { Button } from "~/components/ui/button"
+import { useAuth } from "~/context/authcontext"
+import { useNavigate } from "react-router"
+
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "~/components/ui/dialog"
 
 export default function BookDetail() {
   const { id } = useParams()
   const [book, setBook] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const { user, fetchWithAuth } = useAuth()
+  const navigate = useNavigate()
+  const [openConfirm, setOpenConfirm] = useState(false)
+  const [openPlaced, setOpenPlaced] = useState(false)
+  const [loadingOrder, setLoadingOrder] = useState(false)
+  const [openLoginPrompt, setOpenLoginPrompt] = useState(false)
+  const [orderId, setOrderId] = useState<string | null>(null)
+  const [orderCompleted, setOrderCompleted] = useState(false)
+  const [quantity, setQuantity] = useState(1)
+  const [openValidationError, setOpenValidationError] = useState(false)
+  const [validationMessage, setValidationMessage] = useState("")
+
+  const handlePlaceOrder = async () => {
+    if (quantity < 1 || quantity > book.quantity) {
+      alert(`Please enter a valid quantity between 1 and ${book.quantity}.`)
+      return
+    }
+
+    setLoadingOrder(true)
+    try {
+      const res = await fetchWithAuth(`${SERVICE_URLS.PLACE_ORDER}/placeorder`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          book_id: book['book_id'],
+          price: book.price,
+          quantity: quantity,
+          title: book.title,
+          authors: book.authors,
+          url: book.url
+        })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setOrderId(data.data.order_id)
+        setOpenConfirm(false)
+        setOpenPlaced(true)
+      } else {
+        alert(data.message || "Failed to place order.")
+      }
+    } catch (err) {
+      alert("Something went wrong. Please try again.")
+    } finally {
+      setLoadingOrder(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!orderId) return
+    
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetchWithAuth(`${SERVICE_URLS.PLACE_ORDER}/checkorder/${orderId}`)
+        const data = await res.json()
+        
+        if (res.ok && data.data.status === "completed") {
+          setOpenPlaced(false)
+          clearInterval(interval)
+          setOrderId(null)
+          setOrderCompleted(true)
+        }
+      } catch (err) {
+        console.error("Polling error:", err)
+      }
+    }, 2000)
+
+    return () => clearInterval(interval)
+  }, [orderId])
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -96,11 +177,48 @@ export default function BookDetail() {
             <p><span className="font-medium">ISBN:</span> {book.ISBN}</p>
             <p><span className="font-medium">Available Quantity:</span> {book.quantity}</p>
         </div>
+        
+        {/* Purchase */}
+        <div className="mt-8 flex items-center justify-end gap-5">
+          <label
+            htmlFor="quantity"
+            className="text-sm text-[#5B4636] font-medium tracking-wide"
+          >
+            Quantity:
+          </label>
 
-        {/* Add to Cart */}
-        <button className="cursor-pointer mx-auto mt-8 w-max px-8 py-2 bg-[#5a7249] text-white uppercase tracking-wider hover:bg-[#465b3a] transition">
-            Add to Cart
-        </button>
+          <input
+            type="number"
+            id="quantity"
+            min={1}
+            max={book.quantity}
+            value={quantity}
+            onChange={(e) => {
+              setQuantity(Number(e.target.value))
+            }}
+            className="w-14 text-center border border-[#cbb994] rounded px-2 py-1 text-[#5B4636] bg-[#fdfaf3] focus:outline-none focus:ring-1 focus:ring-[#bca77a]"
+          />
+
+          <Button
+            onClick={() => {
+              if (!user) {
+                setOpenLoginPrompt(true)
+                return
+              }
+
+              if (quantity < 1 || quantity > book.quantity) {
+                setValidationMessage(`Please enter a valid quantity between 1 and ${book.quantity}.`)
+                setOpenValidationError(true)
+                return
+              }
+
+              setOpenConfirm(true)
+            }}
+            className="px-6 py-2 rounded-none bg-[#5a7249] text-white uppercase tracking-wider hover:bg-[#465b3a] transition font-serif"
+          >
+            Purchase
+          </Button>
+        </div>
 
         {/* Description */}
         <div className="mt-10 px-2 text-[0.95rem] text-stone-700 leading-[1.75] italic">
@@ -109,6 +227,141 @@ export default function BookDetail() {
             </p>
         </div>
       </div>
+
+      {/* Confirm Order Dialog */}
+      <Dialog open={openConfirm} onOpenChange={setOpenConfirm}>
+        <DialogContent
+          className="sm:max-w-md text-center bg-cover bg-no-repeat bg-center py-10 rounded-xl shadow-inner shadow-[#bca77a]/40 border border-[#cbb994]"
+          style={{ backgroundImage: "url('/images/parchment.png')" }}
+        >
+          <DialogHeader>
+            <DialogTitle className="mb-3 text-[#3b2f23] font-serif">Confirm Order</DialogTitle>
+            <div className="text-[#5B4636] text-sm font-serif space-y-1">
+              <p>
+                Quantity: <strong>{quantity}</strong>
+              </p>
+              <p>
+                Total: <strong>${(book.price * quantity).toFixed(2)}</strong>
+              </p>
+              <p>
+                Place order for <strong>{book.title}</strong>?
+              </p>
+            </div>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setOpenConfirm(false)} className="bg-[#fefaf2] hover:bg-[#fffefb] text-[#5B4636]">Cancel</Button>
+            <Button onClick={handlePlaceOrder} disabled={loadingOrder} className="text-white bg-[#5a7249] hover:bg-[#465b3a] font-serif">
+              {loadingOrder ? "Processing..." : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Order processing */}
+      <Dialog open={openPlaced} onOpenChange={setOpenPlaced}>
+        <DialogContent
+          className="sm:max-w-md text-center bg-cover bg-no-repeat bg-center py-10 rounded-xl shadow-inner shadow-[#bca77a]/40 border border-[#cbb994]"
+          style={{ backgroundImage: "url('/images/parchment.png')" }}
+        >
+          <DialogHeader>
+            <DialogTitle className="mb-3 text-[#3b2f23] font-serif">
+              Order is processing!
+            </DialogTitle>
+            <DialogDescription className="text-[#5B4636] text-sm font-serif">
+              Your order is being processed. Please wait or view its status from the My Orders page.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setOpenPlaced(false)}
+              className="bg-[#fefaf2] hover:bg-[#fffefb] text-[#5B4636]"
+            >
+              Close
+            </Button>
+            <Button
+              onClick={() => navigate("/orders")}
+              className="text-white bg-[#5a7249] hover:bg-[#465b3a] font-serif"
+            >
+              My Orders
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Order completed */}
+      <Dialog open={orderCompleted} onOpenChange={setOrderCompleted}>
+        <DialogContent
+          className="sm:max-w-md text-center bg-cover bg-no-repeat bg-center py-10 rounded-xl shadow-inner shadow-[#bca77a]/40 border border-[#cbb994]"
+          style={{ backgroundImage: "url('/images/parchment.png')" }}
+        >
+          <DialogHeader>
+            <DialogTitle className="mb-3 text-[#3b2f23] font-serif">
+              Order Completed!
+            </DialogTitle>
+            <DialogDescription className="text-[#5B4636] text-sm font-serif">
+              Your order has been successfully processed. You can now view it on the My Orders page.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setOpenPlaced(false)}
+              className="bg-[#fefaf2] hover:bg-[#fffefb] text-[#5B4636]"
+            >
+              Close
+            </Button>
+            <Button
+              onClick={() => navigate("/orders")}
+              className="text-white bg-[#5a7249] hover:bg-[#465b3a] font-serif"
+            >
+              My Orders
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Not logged in */}
+      <Dialog open={openLoginPrompt} onOpenChange={setOpenLoginPrompt}>
+        <DialogContent
+          className="sm:max-w-md text-center bg-cover bg-no-repeat bg-center py-10 rounded-xl shadow-inner shadow-[#bca77a]/40 border border-[#cbb994]"
+          style={{ backgroundImage: "url('/images/parchment.png')" }}
+        >
+          <DialogHeader>
+            <DialogTitle className="mb-3 text-[#3b2f23] font-serif">You are not logged In</DialogTitle>
+            <DialogDescription className="text-[#5B4636] text-sm font-serif">
+              You must be logged in to place an order.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setOpenLoginPrompt(false)} className="bg-[#fefaf2] hover:bg-[#fffefb] text-[#5B4636]">Cancel</Button>
+            <Button onClick={() => navigate("/login")} className="text-white bg-[#5a7249] hover:bg-[#465b3a] font-serif">Log In</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Failure */}
+      <Dialog open={openValidationError} onOpenChange={setOpenValidationError}>
+        <DialogContent
+          className="sm:max-w-md text-center bg-cover bg-no-repeat bg-center py-10 rounded-xl shadow-inner shadow-[#bca77a]/40 border border-[#cbb994]"
+          style={{ backgroundImage: "url('/images/parchment.png')" }}
+        >
+          <DialogHeader>
+            <DialogTitle className="mb-3 text-[#3b2f23] font-serif">Invalid Quantity</DialogTitle>
+            <DialogDescription className="text-[#5B4636] text-sm font-serif">
+              {validationMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => setOpenValidationError(false)}
+              className="bg-[#fefaf2] hover:bg-[#fffefb] text-[#5B4636]"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

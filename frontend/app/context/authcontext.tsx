@@ -134,6 +134,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (refreshRes.ok) {
           setToken(refreshData.access_token)
           setUser(jwtDecode(refreshData.access_token))
+          console.log(refreshData)
 
           // Retry original request with new token
           res = await fetch(input, {
