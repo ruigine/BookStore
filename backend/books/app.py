@@ -93,6 +93,56 @@ def get_book_by_id(book_id):
                 "message": f"An error occurred: {str(e)}"
             }
         ), 500
+    
+@app.put("/books/<int:book_id>/decrement")
+def decrement_book_quantity(book_id):
+    try:
+        data = request.get_json()
+        quantity_decrement = data.get("quantity_ordered")
+
+        if quantity_decrement is None or not isinstance(quantity_decrement, int) or quantity_decrement <= 0:
+            return jsonify(
+                {
+                    "code": 400,
+                    "message": "Invalid quantity provided. Must be more than 0."
+                }
+            ), 400
+
+        book = db.session.get(Book, book_id)
+        if not book:
+            return jsonify(
+                {
+                    "code": 404,
+                    "message": "Book not found."
+                }
+            ), 404
+        
+        if quantity_decrement > book.quantity:
+            return jsonify(
+                {
+                    "code": 400,
+                    "message": "New quantity should not go below 0."
+                }
+            ), 400
+
+        book.quantity = book.quantity - quantity_decrement
+        db.session.commit()
+
+        return jsonify(
+            {
+                "code": 200,
+                "message": f"Quantity updated to {book.quantity}.",
+                "data": book.json()
+            }
+        ), 200
+
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 500,
+                "message": f"An error occurred: {str(e)}"
+            }
+        ), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=True)
