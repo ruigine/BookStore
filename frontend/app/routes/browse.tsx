@@ -141,13 +141,7 @@ export default function BrowseBooks() {
             </SheetTrigger>
           </div>
 
-          <SheetContent side="left" className="h-[110vh]"
-            style={{
-              backgroundImage: "url('/images/paper.jpg')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
+          <SheetContent side="left" className="h-[110vh] bg-[#FDF8EB]">
             <SheetHeader className="hidden">
               <SheetTitle>Filters</SheetTitle>
               <SheetDescription>

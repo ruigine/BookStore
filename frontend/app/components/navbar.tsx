@@ -23,7 +23,7 @@ export default function NavBar() {
   const { user, logout } = useAuth();
 
   return (
-    <header className="w-full py-4 px-6 font-serif text-sm tracking-wide sticky top-0 shadow-lg z-50" style={{ backgroundImage: "url('/images/paper.jpg')" }}>
+    <header className="w-full py-4 px-6 font-serif text-sm tracking-wide sticky top-0 shadow-lg z-50 bg-[#fdf9eb]">
       <nav className="md:px-3 mx-auto flex items-center justify-between relative">
 
         {/* Left: Full nav (md+) */}

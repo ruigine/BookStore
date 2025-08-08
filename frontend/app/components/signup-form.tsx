@@ -49,15 +49,23 @@ export function SignUpForm({
     <div className={cn("flex flex-col gap-6 mx-2", className)} {...props}>
 
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="sm:max-w-md text-center bg-cover bg-no-repeat bg-center py-10" style={{ backgroundImage: "url('/images/parchment.png')" }}>
+        <DialogContent
+          className="sm:max-w-md text-center bg-cover bg-no-repeat bg-center py-10 rounded-xl shadow-inner shadow-[#bca77a]/40 border border-[#cbb994]"
+          style={{ backgroundImage: "url('/images/parchment.png')" }}
+        >
           <DialogHeader>
-            <DialogTitle className="mb-3">You have created an account!</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="mb-3 text-[#3b2f23] font-serif">
+              You have created an account!
+            </DialogTitle>
+            <DialogDescription className="text-[#5B4636] text-sm max-w-[85%] font-serif">
               You have successfully signed up! Please log in to your account.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button className="mx-auto bg-[#99A98B] hover:bg-[#7e9967] hover:cursor-pointer" onClick={handleContinue}>
+            <Button
+              className="mx-auto mt-6 bg-[#C1B49A] hover:bg-[#aa9978] text-[#3B2F23] font-serif px-6 py-2"
+              onClick={handleContinue}
+            >
               Continue
             </Button>
           </DialogFooter>
@@ -82,7 +90,7 @@ export function SignUpForm({
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pr-20 px-4 py-2 bg-[#f9f2eb] text-[#5B4636] placeholder-[#A89B87] italic font-serif focus:outline-none"
+                  className="w-full pr-20 px-4 py-2 border border-[#cbb994] bg-[#fefaf2] text-[#5B4636] placeholder-[#aa9980] italic font-serif focus:outline-none"
                 />
               </div>
               <div className="grid gap-3">
@@ -94,7 +102,7 @@ export function SignUpForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pr-20 px-4 py-2 bg-[#f9f2eb] text-[#5B4636] placeholder-[#A89B87] italic font-serif focus:outline-none"
+                  className="w-full pr-20 px-4 py-2 border border-[#cbb994] bg-[#fefaf2] text-[#5B4636] placeholder-[#aa9980] italic font-serif focus:outline-none"
                 />
               </div>
               <div className="grid gap-3">
@@ -105,12 +113,12 @@ export function SignUpForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pr-20 px-4 py-2 bg-[#f9f2eb] text-[#5B4636] placeholder-[#A89B87] italic font-serif focus:outline-none"
+                  className="w-full pr-20 px-4 py-2 border border-[#cbb994] bg-[#fefaf2] text-[#5B4636] placeholder-[#aa9980] italic font-serif focus:outline-none"
                 />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full bg-[#99A98B] hover:bg-[#7e9967] hover:cursor-pointer">
+                <Button type="submit" className="w-full bg-[#C1B49A] hover:bg-[#aa9978] text-[#3B2F23] font-serif transition duration-200 cursor-pointer">
                   Sign Up
                 </Button>
               </div>

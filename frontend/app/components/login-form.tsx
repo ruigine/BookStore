@@ -58,7 +58,7 @@ export function LoginForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pr-20 px-4 py-2 bg-[#f9f2eb] text-[#5B4636] placeholder-[#A89B87] italic font-serif focus:outline-none"
+                  className="w-full pr-20 px-4 py-2 border border-[#cbb994] bg-[#fefaf2] text-[#5B4636] placeholder-[#aa9980] italic font-serif focus:outline-none"
                 />
               </div>
               <div className="grid gap-3">
@@ -69,12 +69,12 @@ export function LoginForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pr-20 px-4 py-2 bg-[#f9f2eb] text-[#5B4636] placeholder-[#A89B87] italic font-serif focus:outline-none"
+                  className="w-full pr-20 px-4 py-2 border border-[#cbb994] bg-[#fefaf2] text-[#5B4636] placeholder-[#aa9980] italic font-serif focus:outline-none"
                 />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full bg-[#99A98B] hover:bg-[#7e9967] hover:cursor-pointer">
+                <Button type="submit" className="w-full bg-[#C1B49A] hover:bg-[#aa9978] text-[#3B2F23] font-serif transition duration-200 cursor-pointer">
                   Login
                 </Button>
               </div>
