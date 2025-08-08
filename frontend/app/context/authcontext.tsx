@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react"
-import { SERVICE_URLS } from "../src/constants";
+import { SERVICE_URLS } from "~/src/constants";
 import { jwtDecode } from "jwt-decode"
 import { useNavigate } from "react-router";
 
@@ -110,6 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     init: RequestInit = {}
   ): Promise<Response> => {
     if (!token) {
+      logout()
       throw new Error("No token available")
     }
 

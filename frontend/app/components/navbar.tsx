@@ -9,7 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "../components/ui/sheet";
+} from "~/components/ui/sheet";
 
 import {
   DropdownMenu,
@@ -32,7 +32,7 @@ export default function NavBar() {
             I. Browse books
           </Link>
 
-          {user && (<Link to="/orders" className={`hover:underline hover:italic ${useLocation().pathname === "/orders" && "italic underline text-green-800"}`}>
+          {user && (<Link to="/myorders" className={`hover:underline hover:italic ${useLocation().pathname === "/myorders" && "italic underline text-green-800"}`}>
             II. My orders
           </Link>)}
         </div>
@@ -74,10 +74,10 @@ export default function NavBar() {
                 </Link>
 
                 {user && (<Link
-                  to="/orders"
+                  to="/myorders"
                   onClick={() => setOpen(false)}
                   className={`block group transition-all ${
-                    useLocation().pathname === "/orders"
+                    useLocation().pathname === "/myorders"
                       ? "underline decoration-gray-300e"
                       : "hover:underline hover:italic decoration-gray-300"
                   }`}

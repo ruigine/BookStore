@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router";
-import BookFilters from "../components/bookfilters";
-import { SERVICE_URLS } from "../src/constants";
+import BookFilters from "~/components/bookfilters";
+import { SERVICE_URLS } from "~/src/constants";
 import { Menu, Search, ChevronUp, ChevronDown } from "lucide-react";
 
 import {
@@ -11,7 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "../components/ui/sheet";
+} from "~/components/ui/sheet";
 
 export default function BrowseBooks() {
   const [searchParams, setSearchParams] = useSearchParams();

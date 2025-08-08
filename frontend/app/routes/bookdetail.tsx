@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router"
-import { SERVICE_URLS } from "../src/constants"
+import { SERVICE_URLS } from "~/src/constants"
 import { Loader } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { useAuth } from "~/context/authcontext"
