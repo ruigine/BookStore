@@ -120,6 +120,34 @@ def get_orders_by_user(user_id):
             }
         ), 500
 
+@app.get("/orders/user/<int:user_id>/book/<int:book_id>")
+def get_pending_order_by_user_and_book(user_id, book_id):
+    try:
+        order = Order.query.filter_by(user_id=user_id, status="pending", book_id=book_id).first()
+
+        if not order:
+            return jsonify(
+                {
+                    "code": 200,
+                    "hasPending": False
+                }
+            ), 200
+
+        return jsonify(
+            {
+                "code": 200,
+                "hasPending": True,
+                "data": order.json()
+            }
+        ), 200
+
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 500,
+                "message": f"An error occurred: {str(e)}"
+            }
+        ), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003, debug=True)

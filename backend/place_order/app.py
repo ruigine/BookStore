@@ -79,7 +79,23 @@ def check_order_status(order_id):
                 "message": f"An error occurred: {str(e)}"
             }
         ), 500
+    
+@app.get("/pendingorder/<int:book_id>")
+@jwt_required
+def get_my_pending_book_order(book_id):
+    try:
+        user_id = request.user["sub"]
+        res = requests.get(f"{ORDERS_URL}/user/{user_id}/book/{book_id}")
+        
+        return jsonify(res.json()), res.status_code
 
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 500,
+                "message": f"An error occurred: {str(e)}"
+            }
+        ), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5004, debug=True)
