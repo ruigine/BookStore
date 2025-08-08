@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import { SERVICE_URLS } from "~/src/constants"
 import { useAuth } from "~/context/authcontext"
 import { Link } from "react-router"
+import { Button } from "~/components/ui/button"
+import { RefreshCcw } from "lucide-react"
 
 interface Order {
   order_id: number
@@ -20,27 +22,27 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true)
   const { user, fetchWithAuth } = useAuth()
 
+  const fetchOrders = async () => {
+    try {
+      const res = await fetchWithAuth(`${SERVICE_URLS.DISPLAY_ORDERS}/myorders`)
+      const data = await res.json()
+      if (res.ok) setOrders(data.data)
+    } catch (err) {
+      console.error("Failed to fetch orders", err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (!user) return
-
-    const fetchOrders = async () => {
-      try {
-        const res = await fetchWithAuth(`${SERVICE_URLS.DISPLAY_ORDERS}/myorders`)
-        const data = await res.json()
-        if (res.ok) setOrders(data.data)
-      } catch (err) {
-        console.error("Failed to fetch orders", err)
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchOrders()
   }, [user])
 
   return (
     <div className="bg-[#fdfaf3] min-h-screen px-6 sm:px-12 py-16 max-w-5xl mx-auto font-serif text-[#4A3B2E] tracking-wide">
       {/* Vintage Chapter Header */}
-      <div className="text-center mb-16">
+      <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-4 mb-6 text-[#c5bca4] text-xl select-none">
           <span className="border-t border-[#c5bca4] w-10" />
           ❧
@@ -52,6 +54,21 @@ export default function MyOrdersPage() {
           <div className="w-40 border-t border-[#d5c3a3]"></div>
         </div>
       </div>
+
+      {!loading && orders.length > 0 && (
+        <div className="flex justify-end mb-8">
+          <Button
+            onClick={() => {
+              setLoading(true)
+              fetchOrders()
+            }}
+            className="group flex items-center gap-2 bg-[#5a7249] hover:bg-[#465b3a] text-white font-serif tracking-wide rounded-full px-4 py-2 shadow-sm border border-[#4a5e3a] transition-all duration-200"
+          >
+            <RefreshCcw className="w-4 h-4 group-hover:rotate-[-25deg] transition-transform duration-300" />
+            <span>Refresh Orders</span>
+          </Button>
+        </div>
+      )}
 
       {/* Order Section */}
       {loading ? (
