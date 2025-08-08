@@ -72,7 +72,7 @@ export default function MyOrdersPage() {
               <div className="bg-[#fbf8f2] border border-[#d7c9b0] rounded-xl shadow-sm px-6 py-7 relative">
                 {/* Top Label */}
                 <div className="absolute -top-4 left-6 bg-[#fbf8f2] px-3 text-sm italic tracking-wider text-[#857158] border border-[#d7c9b0] rounded-full shadow">
-                  Order No. {order.order_id}
+                  Order #{order.order_id}
                 </div>
 
                 {/* Book and Details */}
