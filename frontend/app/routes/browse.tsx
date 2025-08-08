@@ -122,7 +122,7 @@ export default function BrowseBooks() {
         )}
       </div>
 
-      <div className="col-span-13 lg:col-span-6">
+      <div className="col-span-13 lg:col-span-6 mb-10">
         <Sheet onOpenChange={setOpened}>
           <div 
             className="md:hidden pl-10 py-3 w-full sticky top-13 z-40 text-white"
