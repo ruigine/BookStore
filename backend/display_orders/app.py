@@ -14,18 +14,29 @@ def get_my_orders():
     try:
         user_id = request.user["sub"]
 
-        response = requests.get(f"{ORDERS_URL}/{user_id}")
+        page = request.args.get('page')
+        limit = request.args.get('limit')
+        query_string = ''
+
+        if page is not None and limit is not None:
+            query_string = f"?page={page}&limit={limit}"
+        elif page is not None:
+            query_string = f"?page={page}"
+        elif limit is not None:
+            query_string = f"?limit={limit}"
+        
+        url = f"{ORDERS_URL}/{user_id}"
+        if query_string:
+            url += query_string
+
+        response = requests.get(url)
+        
         if response.status_code != 200:
             return jsonify(response.json()), response.status_code
 
         orders = response.json()["data"]
-        return jsonify(
-            {
-                "code": 200,
-                "data": orders
-            }
-        ), 200
-
+        return jsonify(response.json()), response.status_code
+        
     except Exception as e:
         return jsonify(
             {

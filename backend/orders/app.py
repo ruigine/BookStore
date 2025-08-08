@@ -105,7 +105,33 @@ def get_order(order_id):
 @app.get("/orders/user/<int:user_id>")
 def get_orders_by_user(user_id):
     try:
-        orders = Order.query.filter_by(user_id=user_id).order_by(desc(Order.order_date)).all()
+        base_query = Order.query.filter_by(user_id=user_id).order_by(desc(Order.order_date))
+
+        page = request.args.get('page', type=int)
+        limit = request.args.get('limit', type=int)
+
+        if page is not None or limit is not None:
+            page = page or 1
+            limit = limit or 4
+            offset = (page - 1) * limit
+
+            total_orders = base_query.count()
+            paginated_orders = base_query.offset(offset).limit(limit).all()
+
+            return jsonify(
+                {
+                    "code": 200,
+                    "data": [order.json() for order in paginated_orders],
+                    "pagination": {
+                        "page": page,
+                        "limit": limit,
+                        "total": total_orders,
+                        "has_more": offset + limit < total_orders
+                    }
+                }
+            ), 200
+
+        orders = base_query.all()
         return jsonify(
             {
                 "code": 200,
