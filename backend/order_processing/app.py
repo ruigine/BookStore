@@ -19,7 +19,7 @@ def process_order(ch, method, properties, body):
 
         # Step 1: Decrement book quantity
         decrement_res = requests.put(
-            f"{BOOKS_URL}/{book_id}",
+            f"{BOOKS_URL}/{book_id}/decrement",
             json={"quantity_ordered": quantity_ordered}
         )
 

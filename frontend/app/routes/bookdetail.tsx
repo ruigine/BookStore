@@ -32,9 +32,17 @@ export default function BookDetail() {
   const [openValidationError, setOpenValidationError] = useState(false)
   const [validationMessage, setValidationMessage] = useState("")
 
+  const fetchBook = async () => {
+    const res = await fetch(`${SERVICE_URLS.BOOKS}/books/${id}`)
+    const data = await res.json()
+    if (res.ok) setBook(data.data)
+    setLoading(false)
+  }
+
   const handlePlaceOrder = async () => {
     if (quantity < 1 || quantity > book.quantity) {
-      alert(`Please enter a valid quantity between 1 and ${book.quantity}.`)
+      setValidationMessage(`Please enter a valid quantity between 1 and ${book.quantity}.`)
+      setOpenValidationError(true)
       return
     }
 
@@ -58,10 +66,12 @@ export default function BookDetail() {
         setOpenConfirm(false)
         setOpenPlaced(true)
       } else {
-        alert(data.message || "Failed to place order.")
+        setValidationMessage(data.message || "Failed to place order.")
+        setOpenValidationError(true)
       }
     } catch (err) {
-      alert("Something went wrong. Please try again.")
+      setValidationMessage("Something went wrong. Please try again.")
+      setOpenValidationError(true)
     } finally {
       setLoadingOrder(false)
     }
@@ -76,10 +86,17 @@ export default function BookDetail() {
         const data = await res.json()
         
         if (res.ok && data.data.status === "completed") {
+          fetchBook()
           setOpenPlaced(false)
           clearInterval(interval)
           setOrderId(null)
           setOrderCompleted(true)
+        } else if (data.data.status === "failed") {
+          setOpenPlaced(false)
+          clearInterval(interval)
+          setOrderId(null)
+          setValidationMessage("Your order could not be processed due to insufficient stock or a system error.")
+          setOpenValidationError(true)
         }
       } catch (err) {
         console.error("Polling error:", err)
@@ -90,13 +107,6 @@ export default function BookDetail() {
   }, [orderId])
 
   useEffect(() => {
-    const fetchBook = async () => {
-      const res = await fetch(`${SERVICE_URLS.BOOKS}/books/${id}`)
-      const data = await res.json()
-      if (res.ok) setBook(data.data)
-      setLoading(false)
-    }
-
     fetchBook()
   }, [id])
 
@@ -123,7 +133,7 @@ export default function BookDetail() {
     >
       {/* Left Column – Book Image */}
       <div className="relative flex justify-center bg-gradient-to-r from-[#fcf6e8] to-[#fefaf2] px-20 sm:px-12 lg:px-0 pt-20 md:after:absolute md:after:top-[0px] md:after:h-full md:after:right-0 md:after:w-[8px] md:after:bg-gradient-to-b md:after:from-black/30 md:after:via-black/10 md:after:shadow-[0_0_35px_35px_rgba(0,0,0,0.1)] md:after:to-black/30 md:after:blur-md md:after:rounded-full">
-        <div className="group max-h-[500px] mb-6 [perspective:1000px]">
+        <div className="group max-h-[500px]  mb-6 [perspective:1000px]">
             <div className="h-full w-full relative transition-transform duration-500 group-hover:rotate-y-[18deg] group-hover:scale-[1.04] transform-style-preserve-3d">
             {/* Book Face */}
             <img
@@ -179,14 +189,16 @@ export default function BookDetail() {
         </div>
         
         {/* Purchase */}
-        <div className="mt-8 flex items-center justify-end gap-5">
+        <div className={`mt-8 flex items-center gap-5 ${book.quantity === 0 ? "justify-center" : "justify-end"}`}>
+          {book.quantity > 0 && (
           <label
             htmlFor="quantity"
             className="text-sm text-[#5B4636] font-medium tracking-wide"
           >
             Quantity:
-          </label>
+          </label>)}
 
+          {book.quantity > 0 && (
           <input
             type="number"
             id="quantity"
@@ -197,7 +209,7 @@ export default function BookDetail() {
               setQuantity(Number(e.target.value))
             }}
             className="w-14 text-center border border-[#cbb994] rounded px-2 py-1 text-[#5B4636] bg-[#fdfaf3] focus:outline-none focus:ring-1 focus:ring-[#bca77a]"
-          />
+          />)}
 
           <Button
             onClick={() => {
@@ -214,9 +226,10 @@ export default function BookDetail() {
 
               setOpenConfirm(true)
             }}
-            className="px-6 py-2 rounded-none bg-[#5a7249] text-white uppercase tracking-wider hover:bg-[#465b3a] transition font-serif"
+            className="disabled:bg-red-900 cursor-pointer px-6 py-2 rounded-none bg-[#5a7249] text-white uppercase tracking-wider hover:bg-[#465b3a] transition font-serif"
+            disabled={book.quantity === 0}
           >
-            Purchase
+            {book.quantity === 0 ? "Out of Stock" : "Purchase"}
           </Button>
         </div>
 
@@ -300,7 +313,7 @@ export default function BookDetail() {
               Order Completed!
             </DialogTitle>
             <DialogDescription className="text-[#5B4636] text-sm font-serif">
-              Your order has been successfully processed. You can now view it on the My Orders page.
+              Your order has been successfully processed. You can now view it from the My Orders page.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
