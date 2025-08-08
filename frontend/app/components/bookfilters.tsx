@@ -48,7 +48,7 @@ export default function BookFilters({
         aspectRatio: "768 / 1064",
         borderStyle: "solid",
         borderWidth: "40px",
-        borderImageSource: "url('/images/vintage-frame.png')",
+        borderImageSource: "url('/images/vintage-frame.jpg",
         borderImageSlice: "100 fill",
         borderImageRepeat: "stretch",
         borderImageOutset: 0,

@@ -83,10 +83,10 @@ export default function BrowseBooks() {
   }, [searchParams, page]);
 
   return (
-    <div className="grid md:grid-cols-24 lg:grid-cols-6 gap-4">
-      <div className="hidden md:block md:col-span-11 lg:col-span-2 m-5 relative select-none">
+    <div className="grid md:grid-cols-24 lg:grid-cols-9 gap-4">
+      <div className="hidden md:block md:col-span-11 lg:col-span-3 m-5 relative select-none">
         {!opened && (
-          <div className="sticky top-10 left-0">
+          <div className="sticky top-15 left-0 -mt-5">
             <BookFilters
               searchTerm={searchTerm}
               selectedGenre={selectedGenre}
@@ -122,7 +122,7 @@ export default function BrowseBooks() {
         )}
       </div>
 
-      <div className="col-span-13 lg:col-span-4">
+      <div className="col-span-13 lg:col-span-6">
         <Sheet onOpenChange={setOpened}>
           <div 
             className="md:hidden pl-10 py-3 w-full sticky top-13 z-40 text-white"
@@ -141,12 +141,12 @@ export default function BrowseBooks() {
             </SheetTrigger>
           </div>
 
-          <SheetContent side="left" className="bg-[#FDF8EB] h-[110vh]"
-            // style={{
-            //   backgroundImage: "url('/images/green-noise.png')",
-            //   backgroundSize: "cover",
-            //   backgroundPosition: "center",
-            // }}
+          <SheetContent side="left" className="h-[110vh]"
+            style={{
+              backgroundImage: "url('/images/paper.jpg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
           >
             <SheetHeader className="hidden">
               <SheetTitle>Filters</SheetTitle>
@@ -190,14 +190,14 @@ export default function BrowseBooks() {
           </SheetContent>
         </Sheet>
 
-        <h1 className="text-4xl text-center mt-9 font-[Great_Vibes]">— Browse Books —</h1>
+        <h1 className="text-4xl text-center mt-10 mb-6 font-[Great_Vibes] text-[#5B4636]">— Browse Books —</h1>
 
         {Array.isArray(books) && books.length > 0 ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 px-4">
             {books.map((book: any) => (
               <Link to={`/books/${book.book_id}`}
                 key={book.book_id}
-                className="group py-4 -mx-1 text-center text-sm text-stone-700 border border-[#eedab8] rounded-xl w-full"
+                className="group text-center text-sm border border-[#eedab8] rounded-xl p-4 hover:shadow-md transition-all"
               >
                 <div className="w-max-full w-[140px] h-[200px] mb-6 [perspective:1000px] mx-auto">
                   <div className="h-full w-full relative transition-transform duration-500 group-hover:rotate-y-[18deg] group-hover:scale-[1.04] transform-style-preserve-3d">
@@ -206,7 +206,7 @@ export default function BrowseBooks() {
                     <img
                       src={book.url}
                       alt={book.title}
-                      className="h-full w-full object-cover hover:rounded-tr-md hover:rounded-br-md rounded-tl-none rounded-bl-none group-hover:shadow-xl relative z-10 transition-all duration-500"
+                      className="h-full w-full object-cover rounded-md group-hover:rounded-tr-md group-hover:rounded-br-md group-hover:rounded-tl-none group-hover:rounded-bl-none group-hover:shadow-xl relative z-10 transition-all duration-500"
                     />
 
                     {/* Spine */}
@@ -226,13 +226,13 @@ export default function BrowseBooks() {
                 </div>
 
                 <h2
-                  className="mb-2 truncate group-hover:underline px-2"
+                  className="text-[#5B4636] font-semibold text-[1rem] truncate px-2 group-hover:underline"
                   title={book.title}
                 >
                   {book.title}
                 </h2>
                 <p className="italic text-[0.90rem] text-stone-500 mb-1 px-2">by {book.authors}</p>
-                <p className="text-sm mb-2 text-green-700">${book.price}</p>
+                <p className="text-sm text-green-700">${book.price}</p>
               </Link>
             ))}
           </div>

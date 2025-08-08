@@ -33,9 +33,15 @@ export default function BookDetail() {
   }
 
   return (
-    <div className="min-h-screen grid grid-cols-2 font-serif text-[#5B4636] bg-[#fdf9f1]">
+    <div
+      className="relative min-h-screen grid md:grid-cols-2 font-serif text-[#5B4636] bg-[#fdf9f1]
+        after:absolute after:inset-y-0 after:right-0 after:w-[8px]
+        after:bg-gradient-to-b after:from-black/30 after:via-black/10 after:to-black/30
+        after:shadow-[0_0_35px_35px_rgba(0,0,0,0.1)] after:blur-md after:rounded-full
+        md:after:hidden"
+    >
       {/* Left Column – Book Image */}
-      <div className="relative flex justify-center bg-gradient-to-r from-[#fcf6e8] to-[#fefaf2] pl-20 pr-32 py-20 after:absolute after:top-[-40px] after:bottom-[-40px] after:right-0 after:w-[8px] after:bg-gradient-to-b after:from-black/30 after:via-black/10 after:shadow-[0_0_35px_35px_rgba(0,0,0,0.1)] after:to-black/30 after:blur-md after:rounded-full">
+      <div className="relative flex justify-center bg-gradient-to-r from-[#fcf6e8] to-[#fefaf2] px-20 sm:px-12 lg:px-0 pt-20 md:after:absolute md:after:top-[0px] md:after:h-full md:after:right-0 md:after:w-[8px] md:after:bg-gradient-to-b md:after:from-black/30 md:after:via-black/10 md:after:shadow-[0_0_35px_35px_rgba(0,0,0,0.1)] md:after:to-black/30 md:after:blur-md md:after:rounded-full">
         <div className="group max-h-[500px] mb-6 [perspective:1000px]">
             <div className="h-full w-full relative transition-transform duration-500 group-hover:rotate-y-[18deg] group-hover:scale-[1.04] transform-style-preserve-3d">
             {/* Book Face */}
@@ -62,7 +68,7 @@ export default function BookDetail() {
         </div>
         </div>
       {/* Right Column – Book Details */}
-      <div className="flex flex-col justify-center pl-32 py-20 pr-20 font-serif bg-gradient-to-r from-[#f9f4ea] to-[#fef9ee]">
+      <div className="flex flex-col justify-center py-10 sm:py-20 px-10 sm:px-14 lg:px-20 font-serif bg-gradient-to-r from-[#f9f4ea] to-[#fef9ee]">
         {/* Decorative Title Block */}
         <div className="mx-auto relative pb-10 text-center w-full">
             <div className="flex items-center justify-center gap-4 mb-4 text-[#c5bca4] text-xl select-none">
