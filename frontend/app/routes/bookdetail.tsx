@@ -349,7 +349,7 @@ export default function BookDetail() {
               Close
             </Button>
             <Button
-              onClick={() => navigate("/orders")}
+              onClick={() => navigate("/myorders")}
               className="text-white bg-[#5a7249] hover:bg-[#465b3a] font-serif"
             >
               My Orders
@@ -375,13 +375,13 @@ export default function BookDetail() {
           <DialogFooter>
             <Button
               variant="secondary"
-              onClick={() => setOpenPlaced(false)}
+              onClick={() => setOrderCompleted(false)}
               className="bg-[#fefaf2] hover:bg-[#fffefb] text-[#5B4636]"
             >
               Close
             </Button>
             <Button
-              onClick={() => navigate("/orders")}
+              onClick={() => navigate("/myorders")}
               className="text-white bg-[#5a7249] hover:bg-[#465b3a] font-serif"
             >
               My Orders

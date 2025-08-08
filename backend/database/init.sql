@@ -9,7 +9,7 @@ CREATE TABLE Users (
     username VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL,
     password_hash TEXT NOT NULL,
-    created_at DATE NOT NULL
+    created_at DATETIME NOT NULL
 );
 
 CREATE TABLE Books (
@@ -36,7 +36,7 @@ CREATE TABLE Orders (
     title VARCHAR(255) NOT NULL,
     authors TEXT,
     url TEXT,
-    order_date DATE NOT NULL,
+    order_date DATETIME NOT NULL,
 
     FOREIGN KEY (book_id) REFERENCES Books(book_id),
     FOREIGN KEY (user_id) REFERENCES Users(user_id)

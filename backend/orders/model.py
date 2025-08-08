@@ -15,7 +15,7 @@ class Order(db.Model):
     title = db.Column(db.String(255), nullable=False)
     authors = db.Column(db.Text, nullable=True)
     url = db.Column(db.Text, nullable=True)
-    order_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    order_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, book_id, user_id, price, quantity, status, title, authors, url):
         self.book_id = book_id

@@ -10,7 +10,7 @@ class User(db.Model):
     username = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     password_hash = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, username, email, password_hash):
         self.username = username

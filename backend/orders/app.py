@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from os import environ
 from model import db, Order
+from sqlalchemy import desc
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
@@ -104,7 +105,7 @@ def get_order(order_id):
 @app.get("/orders/user/<int:user_id>")
 def get_orders_by_user(user_id):
     try:
-        orders = Order.query.filter_by(user_id=user_id).all()
+        orders = Order.query.filter_by(user_id=user_id).order_by(desc(Order.order_date)).all()
         return jsonify(
             {
                 "code": 200,
