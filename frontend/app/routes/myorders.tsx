@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { SERVICE_URLS } from "~/src/constants"
 import { useAuth } from "~/context/authcontext"
 import { Link } from "react-router"
@@ -21,23 +21,56 @@ export default function MyOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const { user, fetchWithAuth } = useAuth()
-
-  const fetchOrders = async () => {
-    try {
-      const res = await fetchWithAuth(`${SERVICE_URLS.DISPLAY_ORDERS}/myorders`)
-      const data = await res.json()
-      if (res.ok) setOrders(data.data)
-    } catch (err) {
-      console.error("Failed to fetch orders", err)
-    } finally {
-      setLoading(false)
+  const [page, setPage] = useState(1);
+  const scrollAttached = useRef(false);
+  const [hasMore, setHasMore] = useState(true);
+  
+  const handleScroll = () => {
+    const scrollTop = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const fullHeight = document.documentElement.scrollHeight;
+    
+    if (scrollTop + windowHeight >= fullHeight - 5) {
+      if (scrollAttached.current) {
+        window.removeEventListener("scroll", handleScroll);
+        scrollAttached.current = false;
+      }
+      setPage((prev) => prev + 1);
     }
-  }
+  };
 
   useEffect(() => {
     if (!user) return
+
+    const fetchOrders = async () => {
+      try {
+        if (page == 0 || page == 1 || hasMore) {
+          const res = await fetchWithAuth(`${SERVICE_URLS.DISPLAY_ORDERS}/myorders?page=${Math.max(1, page)}`)
+          const data = await res.json()
+
+          if (res.ok) {
+            setOrders(prev =>
+              (page === 1 || page === 0) ? data.data : [...prev, ...data.data]
+            )
+          }
+
+          setHasMore(data.pagination["has_more"])
+
+          console.log(data)
+          if (!scrollAttached.current) {
+            window.addEventListener("scroll", handleScroll)
+            scrollAttached.current = true
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch orders", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchOrders()
-  }, [user])
+  }, [user, page])
 
   return (
     <div className="bg-[#fdfaf3] min-h-screen px-6 sm:px-12 py-16 max-w-5xl mx-auto font-serif text-[#4A3B2E] tracking-wide">
@@ -60,7 +93,9 @@ export default function MyOrdersPage() {
           <Button
             onClick={() => {
               setLoading(true)
-              fetchOrders()
+              setOrders([])
+              setHasMore(true);
+              setPage((prev) => prev === 1 ? 0 : 1)
             }}
             className="group flex items-center gap-2 bg-[#5a7249] hover:bg-[#465b3a] text-white font-serif tracking-wide rounded-full px-4 py-2 shadow-sm border border-[#4a5e3a] transition-all duration-200"
           >
