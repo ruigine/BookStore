@@ -193,7 +193,7 @@ def refresh_token():
             "sub": str(user.user_id),
             "name": user.username,
             "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(hours=24),
+            "exp": payload["exp"],
             "type": "refresh"
         }, environ.get("JWT_SECRET_KEY"), algorithm="HS256")
 
