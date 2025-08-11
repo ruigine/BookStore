@@ -32,5 +32,5 @@ class Book(db.Model):
             "url": self.url,
         }
     
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return f"<Book {self.book_id} - {self.title}>"
