@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from model import db, Book
+from .model import db, Book
 from os import environ
 from sqlalchemy import or_
 
