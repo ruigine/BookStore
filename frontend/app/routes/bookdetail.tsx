@@ -33,34 +33,6 @@ export default function BookDetail() {
   const [validationMessage, setValidationMessage] = useState("")
   const [hasPending, setHasPending] = useState(false)
 
-  function startPollingOrderStatus() {
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetchWithAuth(`${SERVICE_URLS.PLACE_ORDER}/checkorder/${orderId}`)
-        const data = await res.json()
-
-        if (res.ok && data.data.status === "completed") {
-          fetchBook()
-          setOpenPlaced(false)
-          clearInterval(interval)
-          setOrderId(null)
-          setOrderCompleted(true)
-        } else if (data.data.status === "failed") {
-          setOpenPlaced(false)
-          clearInterval(interval)
-          setOrderId(null)
-          setValidationMessage("Your order could not be processed due to insufficient stock or a system error.")
-          setOpenValidationError(true)
-        }
-      } catch (err) {
-        console.error("Polling error:", err)
-        clearInterval(interval)
-      }
-    }, 2000)
-
-    return interval
-  }
-
   const fetchBook = async () => {
     const res = await fetch(`${SERVICE_URLS.BOOKS}/books/${id}`)
     const data = await res.json()
@@ -122,6 +94,7 @@ export default function BookDetail() {
           setHasPending(false)
           setOrderCompleted(true)
         } else if (data.data.status === "failed") {
+          fetchBook()
           setOpenPlaced(false)
           clearInterval(interval)
           setOrderId(null)

@@ -13,62 +13,84 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 CORS(app, supports_credentials=True)
 
-def verify_info(email, password):
+def validate_email(email):
     email_regex = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
     
-    if re.match(email_regex, email) and len(password) >= 6:
-        return True
-    else:
+    if not isinstance(email, str):
         return False
+    email = email.strip()
+    return bool(re.fullmatch(email_regex, email))
+
+def validate_password(password):
+    if not isinstance(password, str):
+        return False
+    return len(password) >= 6
 
 @app.post("/register")
 def create_user():
     data = request.get_json()
 
-    if verify_info(data['email'], data['password']):
-        try:
-            existing_user = User.query.filter_by(email=data['email']).first()
+    if not data or not data.get('email') or not data.get('password') or not data.get('username'):
+        return jsonify(
+            {
+                "code": 400,
+                "message": "Username, email and password are required."
+            }
+        ), 400
+    if not validate_email(data['email']):
+        return jsonify(
+            {
+                "code": 400,
+                "data": {
+                    "email": data['email']
+                },
+                "message": "Invalid email format."
+            }
+        ), 400
+    if not validate_password(data['password']):
+        return jsonify(
+            {
+                "code": 400,
+                "data": {
+                    "email": data['email']
+                },
+                "message": "Password must be at least 6 characters."
+            }
+        ), 400
 
-            if existing_user:
-                return jsonify(
-                    {
-                        "code": 400,
-                        "data": {
-                            "email": data['email']
-                        },
-                        "message": "Email is already registered."
-                    }
-                ), 400
+    try:
+        existing_user = User.query.filter_by(email=data['email']).first()
 
-            new_user = User(
-                username=data['username'],
-                email=data['email'],
-                password_hash=generate_password_hash(data['password'])
-            )
-
-            db.session.add(new_user)
-            db.session.commit()
-
-        except Exception as e:
+        if existing_user:
             return jsonify(
                 {
-                    "code": 500,
+                    "code": 409,
                     "data": {
                         "email": data['email']
                     },
-                    "message": f"An error occurred creating the user. {e}"
+                    "message": "Email is already registered."
                 }
-            ), 500
-    else:
+            ), 409
+
+        new_user = User(
+            username=data['username'],
+            email=data['email'],
+            password_hash=generate_password_hash(data['password'])
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+    except Exception as e:
         return jsonify(
-                {
-                    "code": 400,
-                    "data": {
-                        "email": data['email']
-                    },
-                    "message": "Invalid email or password less than 6 characters"
-                }
-            ), 400
+            {
+                "code": 500,
+                "data": {
+                    "email": data['email']
+                },
+                "message": f"An error occurred creating the user."
+            }
+        ), 500
     
     return jsonify(
         {
@@ -112,11 +134,12 @@ def login():
             "type": "access"
         }, environ.get('JWT_SECRET_KEY'), algorithm="HS256")
 
+        refresh_exp = datetime.now(timezone.utc) + timedelta(hours=24)
         refresh_token = jwt.encode({
             "sub": str(user.user_id),
             "name": user.username,
             "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(hours=24),
+            "exp": refresh_exp,
             "type": "refresh"
         }, environ.get('JWT_SECRET_KEY'), algorithm="HS256")
 
@@ -133,7 +156,8 @@ def login():
             httponly=True,
             secure=True,
             samesite="Strict",
-            path="/refresh-token"
+            path="/refresh-token",
+            expires=refresh_exp
         )
 
         return resp
@@ -185,7 +209,7 @@ def refresh_token():
             "sub": str(user.user_id),
             "name": user.username,
             "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
             "type": "access"
         }, environ.get("JWT_SECRET_KEY"), algorithm="HS256")
 
@@ -210,7 +234,8 @@ def refresh_token():
             httponly=True,
             secure=True,
             samesite="Strict",
-            path="/refresh-token"
+            path="/refresh-token",
+            expires=payload["exp"]
         )
 
         return resp

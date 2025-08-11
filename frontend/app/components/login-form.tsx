@@ -29,11 +29,11 @@ export function LoginForm({
     e.preventDefault()
     setError("")
 
-    const success = await login(email, password)
-    if (success) {
+    const result = await login(email, password)
+    if (result.ok) {
       navigate("/browse")
     } else {
-      setError("Invalid email or password.")
+      setError(result.message)
     }
   }
 

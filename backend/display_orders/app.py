@@ -34,7 +34,6 @@ def get_my_orders():
         if response.status_code != 200:
             return jsonify(response.json()), response.status_code
 
-        orders = response.json()["data"]
         return jsonify(response.json()), response.status_code
         
     except Exception as e:

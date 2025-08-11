@@ -9,12 +9,14 @@ type UserPayload = {
   [key: string]: any
 }
 
+type BasicResult = { ok: boolean; status: number; message: string };
+
 type AuthContextType = {
   token: string | null
   user: UserPayload | null
-  login: (email: string, password: string) => Promise<boolean>
+  login: (email: string, password: string) => Promise<BasicResult>
   logout: () => void
-  signup: (email: string, password: string, username: string) => Promise<boolean>
+  signup: (email: string, password: string, username: string) => Promise<BasicResult>
   tokenReady: boolean,
   fetchWithAuth: (
     input: RequestInfo | URL,
@@ -70,13 +72,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (res.ok) {
         setToken(data.access_token)
         setUser(jwtDecode(data.access_token))
-        console.log("user:", user);
-        return true
-      } else {
-        return false
       }
+
+      return { ok: res.ok, status: res.status, message: data.message };
     } catch (err) {
-      return false
+      return { ok: false, status: 0, message: "Network error. Please try again." };
     }
   }
 
@@ -99,9 +99,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       })
 
       const data = await res.json()
-      return res.ok
+      return { ok: res.ok, status: res.status, message: data.message };
     } catch (err) {
-      return false
+      return { ok: false, status: 0, message: "Network error. Please try again." };
     }
   }
 

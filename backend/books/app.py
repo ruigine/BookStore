@@ -120,10 +120,10 @@ def decrement_book_quantity(book_id):
         if quantity_decrement > book.quantity:
             return jsonify(
                 {
-                    "code": 400,
+                    "code": 409,
                     "message": "New quantity should not go below 0."
                 }
-            ), 400
+            ), 409
 
         book.quantity = book.quantity - quantity_decrement
         db.session.commit()

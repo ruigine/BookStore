@@ -32,11 +32,11 @@ export function SignUpForm({
     e.preventDefault()
     setError("")
 
-    const success = await signup(username, email, password)
-    if (success) {
+    const result = await signup(username, email, password)
+    if (result.ok) {
       setOpenDialog(true)
     } else {
-      setError("Failed to create account. Try again.")
+      setError(result.message)
     }
   }
 
