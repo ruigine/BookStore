@@ -6,4 +6,4 @@ export default [
   route("signup", "routes/signup.tsx"),
   route("books/:id", "routes/bookdetail.tsx"),
   route("myorders", "routes/myorders.tsx")
-] satisfies RouteConfig[];
+] satisfies RouteConfig;
