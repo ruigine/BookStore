@@ -139,11 +139,11 @@ jobs:
             done
           done
 
-      - name: Health check (fallback index if no /health)
+      - name: Health check
         run: |
           set -e
           curl -f http://localhost:5173
-          curl -f http://localhost:5001/Health
+          curl -f http://localhost:5001/health
           curl -f http://localhost:5002/health
           curl -f http://localhost:5004/health
           curl -f http://localhost:5005/health
