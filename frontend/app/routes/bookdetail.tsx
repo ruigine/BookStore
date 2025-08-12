@@ -388,7 +388,7 @@ export default function BookDetail() {
           style={{ backgroundImage: "url('/images/parchment.png')" }}
         >
           <DialogHeader>
-            <DialogTitle className="mb-3 text-[#3b2f23] font-serif">You are not logged In</DialogTitle>
+            <DialogTitle className="mb-3 text-[#3b2f23] font-serif">You are not logged in!</DialogTitle>
             <DialogDescription className="text-[#5B4636] text-sm font-serif">
               You must be logged in to place an order.
             </DialogDescription>
