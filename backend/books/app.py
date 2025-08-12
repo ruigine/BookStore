@@ -10,6 +10,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 CORS(app)
 
+@app.route('/health')  
+def health():
+    return {'status': 'ok'}
+
 @app.get("/books")
 def get_books():
     try:

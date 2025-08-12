@@ -9,6 +9,10 @@ CORS(app)
 
 ORDERS_URL = "http://orders:5003/orders"
 
+@app.route('/health')  
+def health():
+    return {'status': 'ok'}
+
 @app.post("/placeorder")
 @jwt_required
 def place_order():

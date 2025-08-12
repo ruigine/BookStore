@@ -13,6 +13,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 CORS(app, supports_credentials=True)
 
+@app.route('/health')  
+def health():
+    return {'status': 'ok'}
+
 def validate_email(email):
     email_regex = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
     
