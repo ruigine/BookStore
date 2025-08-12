@@ -32,10 +32,10 @@ def install_bypass_auth(monkeypatch, sub="1", name="alice"):
 
 
 # ------------------------
-# Unit tests (no client)
+# Integration tests
 # ------------------------
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "qs, expected_suffix",
     [
@@ -68,10 +68,6 @@ def test_builds_orders_url_unit(monkeypatch, qs, expected_suffix):
         assert status == 200
         assert called["url"] == f"{app_module.ORDERS_URL}/1{expected_suffix}"
 
-
-# ------------------------
-# Integration tests (client)
-# ------------------------
 
 @pytest.mark.integration
 def test_myorders_happy_path_passthrough(client, monkeypatch):
