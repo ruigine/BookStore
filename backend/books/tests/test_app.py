@@ -74,6 +74,65 @@ def test_book_json_keeps_optional_keys_when_none():
     assert j["price"] == Decimal("1.00")
     assert j["quantity"] == 0
 
+
+@pytest.mark.unit
+def test_get_books_exception_path(monkeypatch, client):
+    # Patch the Book symbol inside books.app so .count() raises → triggers except: 500
+    import books.app as app_module
+
+    class DummyQuery:
+        def filter(self, *_, **__): return self
+        def count(self): raise RuntimeError("boom")
+        def offset(self, *_): return self
+        def limit(self, *_): return self
+        def all(self): return []
+
+    class DummyBook:
+        query = DummyQuery()
+
+    monkeypatch.setattr(app_module, "Book", DummyBook, raising=False)
+
+    r = client.get("/books")
+    assert r.status_code == 500
+    assert "An error occurred" in r.get_json()["message"]
+
+
+@pytest.mark.unit
+def test_get_book_by_id_exception_path(monkeypatch, client):
+    # Patch db.session.get to raise → triggers except: 500
+    import books.app as app_module
+
+    def boom(*_, **__):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(app_module.db.session, "get", boom, raising=True)
+
+    r = client.get("/books/1")
+    assert r.status_code == 500
+    assert "An error occurred" in r.get_json()["message"]
+
+
+@pytest.mark.unit
+def test_decrement_commit_exception(monkeypatch, client):
+    # Cause commit to fail → triggers except: 500
+    import books.app as app_module
+
+    # Ensure a valid book exists
+    first = _first_book(client)
+    bid = first.get("book_id")
+
+    def boom():
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(app_module.db.session, "commit", boom, raising=True)
+
+    r = client.put(f"/books/{bid}/decrement",
+                   data=json.dumps({"quantity_ordered": 1}),
+                   content_type="application/json")
+    assert r.status_code == 500
+    assert "An error occurred" in r.get_json()["message"]
+
+
 # ------------------------
 # Integration tests
 # ------------------------
@@ -361,61 +420,3 @@ def test_decrement_conflict_and_success(client):
     assert r.status_code == 200
     after_qty = r.get_json()["data"]["quantity"]
     assert after_qty == sci["quantity"] - 2
-
-
-@pytest.mark.integration
-def test_get_books_exception_path(monkeypatch, client):
-    # Patch the Book symbol inside books.app so .count() raises → triggers except: 500
-    import books.app as app_module
-
-    class DummyQuery:
-        def filter(self, *_, **__): return self
-        def count(self): raise RuntimeError("boom")
-        def offset(self, *_): return self
-        def limit(self, *_): return self
-        def all(self): return []
-
-    class DummyBook:
-        query = DummyQuery()
-
-    monkeypatch.setattr(app_module, "Book", DummyBook, raising=False)
-
-    r = client.get("/books")
-    assert r.status_code == 500
-    assert "An error occurred" in r.get_json()["message"]
-
-
-@pytest.mark.integration
-def test_get_book_by_id_exception_path(monkeypatch, client):
-    # Patch db.session.get to raise → triggers except: 500
-    import books.app as app_module
-
-    def boom(*_, **__):
-        raise RuntimeError("boom")
-
-    monkeypatch.setattr(app_module.db.session, "get", boom, raising=True)
-
-    r = client.get("/books/1")
-    assert r.status_code == 500
-    assert "An error occurred" in r.get_json()["message"]
-
-
-@pytest.mark.integration
-def test_decrement_commit_exception(monkeypatch, client):
-    # Cause commit to fail → triggers except: 500
-    import books.app as app_module
-
-    # Ensure a valid book exists
-    first = _first_book(client)
-    bid = first.get("book_id")
-
-    def boom():
-        raise RuntimeError("boom")
-
-    monkeypatch.setattr(app_module.db.session, "commit", boom, raising=True)
-
-    r = client.put(f"/books/{bid}/decrement",
-                   data=json.dumps({"quantity_ordered": 1}),
-                   content_type="application/json")
-    assert r.status_code == 500
-    assert "An error occurred" in r.get_json()["message"]

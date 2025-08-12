@@ -46,6 +46,108 @@ def test_order_repr_contains_id_and_title():
     assert "<Order 99 - Hello>" in repr(o)
 
 
+@pytest.mark.unit
+def test_create_order_exception_path(client, monkeypatch):
+    # Force db.session.commit to raise to hit the 500 branch
+    def boom():
+        raise RuntimeError("boom")
+    monkeypatch.setattr(db.session, "commit", boom, raising=True)
+
+    r = client.post("/orders", json={
+        "book_id": 1, "user_id": 1, "price": "1.00", "quantity": 1,
+        "status": "pending", "title": "X"
+    })
+    assert r.status_code == 500
+    assert "An error occurred" in r.get_json()["message"]
+
+
+@pytest.mark.unit
+def test_get_order_by_id_exception_path(client, monkeypatch):
+    import orders.app as app_module
+
+    def boom(*_, **__):
+        raise RuntimeError("boom")
+
+    # Patch the session.get that the route calls
+    monkeypatch.setattr(app_module.db.session, "get", boom, raising=True)
+
+    r = client.get("/orders/1")
+    assert r.status_code == 500
+    assert "An error occurred" in r.get_json()["message"]
+
+
+@pytest.mark.unit
+def test_update_order_status_success_404_and_exception(client, seed_orders, monkeypatch):
+    target = seed_orders[0]["order_id"]
+
+    # success
+    r = client.put(f"/orders/{target}", json={"status": "failed"})
+    assert r.status_code == 200
+    assert r.get_json()["data"]["status"] == "failed"
+    assert r.get_json()["data"]["order_id"] == target
+
+    # 404
+    r2 = client.put("/orders/999999", json={"status": "failed"})
+    assert r2.status_code == 404
+
+    # exception path (commit fails)
+    def boom():
+        raise RuntimeError("boom")
+    monkeypatch.setattr(db.session, "commit", boom, raising=True)
+    r3 = client.put(f"/orders/{target}", json={"status": "pending"})
+    assert r3.status_code == 500
+    assert "An error occurred" in r3.get_json()["message"]
+
+
+@pytest.mark.unit
+def test_get_orders_by_user_exception_path(client, monkeypatch):
+    # Force .count() to raise inside the paginated branch
+    import orders.app as app_module
+
+    class DummyQuery:
+        def filter_by(self, **_): return self
+        def order_by(self, *_): return self
+        def count(self): raise RuntimeError("boom")
+        def offset(self, *_): return self
+        def limit(self, *_): return self
+        def all(self): return []
+
+    class DummyOrder:
+        query = DummyQuery()
+
+    monkeypatch.setattr(app_module, "Order", DummyOrder, raising=False)
+    r = client.get("/orders/user/1?page=1&limit=2")
+    assert r.status_code == 500
+    assert "An error occurred" in r.get_json()["message"]
+
+
+@pytest.mark.unit
+def test_get_pending_order_by_user_and_book_true_false_and_exception(client, seed_orders, monkeypatch):
+    # True: user 1 has a pending order for book_id 101
+    r = client.get("/orders/user/1/book/101")
+    assert r.status_code == 200
+    j = r.get_json()
+    assert j["code"] == 200 and j["hasPending"] is True
+    assert j["data"]["status"] == "pending"
+
+    # False: no pending for this pair
+    r2 = client.get("/orders/user/1/book/102")
+    assert r2.status_code == 200
+    assert r2.get_json()["hasPending"] is False
+
+    # exception path: make .first() raise
+    import orders.app as app_module
+    class DummyQuery2:
+        def filter_by(self, **_): return self
+        def first(self): raise RuntimeError("boom")
+    class DummyOrder2:
+        query = DummyQuery2()
+    monkeypatch.setattr(app_module, "Order", DummyOrder2, raising=False)
+    r3 = client.get("/orders/user/1/book/101")
+    assert r3.status_code == 500
+    assert "An error occurred" in r3.get_json()["message"]
+
+
 # ------------------------
 # Integration tests
 # ------------------------
@@ -123,21 +225,6 @@ def test_create_order_bad_json_and_missing_fields(client):
 
 
 @pytest.mark.integration
-def test_create_order_exception_path(client, monkeypatch):
-    # Force db.session.commit to raise to hit the 500 branch
-    def boom():
-        raise RuntimeError("boom")
-    monkeypatch.setattr(db.session, "commit", boom, raising=True)
-
-    r = client.post("/orders", json={
-        "book_id": 1, "user_id": 1, "price": "1.00", "quantity": 1,
-        "status": "pending", "title": "X"
-    })
-    assert r.status_code == 500
-    assert "An error occurred" in r.get_json()["message"]
-
-
-@pytest.mark.integration
 def test_get_order_found_and_not_found(client, seed_orders):
     # pick an existing seeded order id
     some = seed_orders[0]["order_id"]
@@ -149,44 +236,6 @@ def test_get_order_found_and_not_found(client, seed_orders):
     r2 = client.get("/orders/999999")
     assert r2.status_code == 404
     assert "not found" in r2.get_json()["message"].lower()
-
-
-@pytest.mark.integration
-def test_get_order_by_id_exception_path(client, monkeypatch):
-    import orders.app as app_module
-
-    def boom(*_, **__):
-        raise RuntimeError("boom")
-
-    # Patch the session.get that the route calls
-    monkeypatch.setattr(app_module.db.session, "get", boom, raising=True)
-
-    r = client.get("/orders/1")
-    assert r.status_code == 500
-    assert "An error occurred" in r.get_json()["message"]
-
-
-@pytest.mark.integration
-def test_update_order_status_success_404_and_exception(client, seed_orders, monkeypatch):
-    target = seed_orders[0]["order_id"]
-
-    # success
-    r = client.put(f"/orders/{target}", json={"status": "failed"})
-    assert r.status_code == 200
-    assert r.get_json()["data"]["status"] == "failed"
-    assert r.get_json()["data"]["order_id"] == target
-
-    # 404
-    r2 = client.put("/orders/999999", json={"status": "failed"})
-    assert r2.status_code == 404
-
-    # exception path (commit fails)
-    def boom():
-        raise RuntimeError("boom")
-    monkeypatch.setattr(db.session, "commit", boom, raising=True)
-    r3 = client.put(f"/orders/{target}", json={"status": "pending"})
-    assert r3.status_code == 500
-    assert "An error occurred" in r3.get_json()["message"]
 
 
 @pytest.mark.integration
@@ -265,55 +314,6 @@ def test_get_orders_by_user_with_pagination_and_defaults(client, seed_orders):
     assert b3["pagination"]["total"] == 3
     assert b3["pagination"]["has_more"] is False
     assert len(b3["data"]) == 1
-
-
-@pytest.mark.integration
-def test_get_orders_by_user_exception_path(client, monkeypatch):
-    # Force .count() to raise inside the paginated branch
-    import orders.app as app_module
-
-    class DummyQuery:
-        def filter_by(self, **_): return self
-        def order_by(self, *_): return self
-        def count(self): raise RuntimeError("boom")
-        def offset(self, *_): return self
-        def limit(self, *_): return self
-        def all(self): return []
-
-    class DummyOrder:
-        query = DummyQuery()
-
-    monkeypatch.setattr(app_module, "Order", DummyOrder, raising=False)
-    r = client.get("/orders/user/1?page=1&limit=2")
-    assert r.status_code == 500
-    assert "An error occurred" in r.get_json()["message"]
-
-
-@pytest.mark.integration
-def test_get_pending_order_by_user_and_book_true_false_and_exception(client, seed_orders, monkeypatch):
-    # True: user 1 has a pending order for book_id 101
-    r = client.get("/orders/user/1/book/101")
-    assert r.status_code == 200
-    j = r.get_json()
-    assert j["code"] == 200 and j["hasPending"] is True
-    assert j["data"]["status"] == "pending"
-
-    # False: no pending for this pair
-    r2 = client.get("/orders/user/1/book/102")
-    assert r2.status_code == 200
-    assert r2.get_json()["hasPending"] is False
-
-    # exception path: make .first() raise
-    import orders.app as app_module
-    class DummyQuery2:
-        def filter_by(self, **_): return self
-        def first(self): raise RuntimeError("boom")
-    class DummyOrder2:
-        query = DummyQuery2()
-    monkeypatch.setattr(app_module, "Order", DummyOrder2, raising=False)
-    r3 = client.get("/orders/user/1/book/101")
-    assert r3.status_code == 500
-    assert "An error occurred" in r3.get_json()["message"]
 
 
 # ------------------------

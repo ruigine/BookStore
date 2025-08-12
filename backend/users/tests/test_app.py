@@ -59,6 +59,30 @@ def test_user_json_and_repr_contract():
     assert "<User 7 - bob>" in repr(u)
 
 
+@pytest.mark.unit
+def test_register_exception_path(client, monkeypatch):
+    # force commit to fail -> 500 path
+    def boom():
+        raise RuntimeError("boom")
+    monkeypatch.setattr(db.session, "commit", boom, raising=True)
+    r = client.post("/register", json={"username": "x", "email": "x@x.com", "password": "abcdef"})
+    assert r.status_code == 500
+    assert "An error occurred" in r.get_json()["message"]
+
+
+@pytest.mark.unit
+def test_login_exception_path(client, monkeypatch, seed_user):
+    # ensure route reaches password check
+    u = seed_user
+    def boom(*_, **__): raise RuntimeError("boom")
+    # Patch where the app actually uses it
+    monkeypatch.setattr("users.app.check_password_hash", boom, raising=True)
+
+    r = client.post("/login", json={"email": u["email"], "password": u["password"]})
+    assert r.status_code == 500
+    assert "An error occurred" in r.get_json()["message"]
+
+
 # ------------------------
 # Integration tests
 # ------------------------
@@ -103,17 +127,6 @@ def test_register_validation_and_conflict(client, seed_user):
     # duplicate email
     r = client.post("/register", json={"username": "dup", "email": "alice@example.com", "password": "abcdef"})
     assert r.status_code == 409
-
-
-@pytest.mark.integration
-def test_register_exception_path(client, monkeypatch):
-    # force commit to fail -> 500 path
-    def boom():
-        raise RuntimeError("boom")
-    monkeypatch.setattr(db.session, "commit", boom, raising=True)
-    r = client.post("/register", json={"username": "x", "email": "x@x.com", "password": "abcdef"})
-    assert r.status_code == 500
-    assert "An error occurred" in r.get_json()["message"]
 
 
 @pytest.mark.integration
@@ -177,19 +190,6 @@ def test_login_missing_or_invalid(client, seed_user):
     # wrong password
     r = client.post("/login", json={"email": u["email"], "password": "wrong"})
     assert r.status_code == 401
-
-
-@pytest.mark.integration
-def test_login_exception_path(client, monkeypatch, seed_user):
-    # ensure route reaches password check
-    u = seed_user
-    def boom(*_, **__): raise RuntimeError("boom")
-    # Patch where the app actually uses it
-    monkeypatch.setattr("users.app.check_password_hash", boom, raising=True)
-
-    r = client.post("/login", json={"email": u["email"], "password": u["password"]})
-    assert r.status_code == 500
-    assert "An error occurred" in r.get_json()["message"]
 
 
 @pytest.mark.integration
