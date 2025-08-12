@@ -1,20 +1,54 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
-name: Python application
+name: Bookstore application
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  frontend-test:
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          node-version: [18.x, 20.x, 22.x]
 
+      defaults:
+        run:
+          working-directory: frontend
+
+      steps:
+        - uses: actions/checkout@v4
+
+        - name: Use Node.js ${{ matrix.node-version }}
+          uses: actions/setup-node@v4
+          with:
+            node-version: ${{ matrix.node-version }}
+            cache: npm
+            cache-dependency-path: frontend/package-lock.json
+
+        - name: Install
+          run: npm ci
+
+        # Lint once on Node 20.x
+        - name: Lint (ESLint)
+          if: ${{ matrix.node-version == '20.x' }}
+          run: |
+            npm run lint --if-present || npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0
+        
+        - name: Typecheck (TS)
+          if: ${{ matrix.node-version == '20.x' }}
+          run: npm run typecheck
+
+        - name: Build
+          run: npm run build --if-present
+          env:
+            CI: true
+
+  backend-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -42,3 +76,97 @@ jobs:
     - name: Test with pytest
       run: |
         pytest || true
+
+  # --- Docker compose smoke tests (integration) ---
+  docker-integration-test:
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create .env for docker compose
+        run: |
+          cat > .env << 'EOF'
+          ## CREDENTIALS FOR TESTING
+          # MySQL
+          MYSQL_DB=bookstore
+          MYSQL_PW=bookstore_password
+
+          # Full DB URL (no nested ${} here)
+          dbURL=mysql+mysqlconnector://root:bookstore_password@db/bookstore
+
+          # JWT
+          JWT_SECRET_KEY=my-secret-key-for-testing
+
+          # RabbitMQ base creds
+          RABBIT_USER=rabbitmq_user
+          RABBIT_PW=rabbitmq_password
+
+          # Environment
+          ENVIRONMENT=test
+          EOF
+
+      - name: Build Docker images
+        run: docker compose build
+
+      - name: Start all services
+        run: docker compose up -d
+
+      - name: Show container status
+        run: docker compose ps
+
+      - name: Tail last logs (initial)
+        run: docker compose logs --tail=50
+
+      - name: Wait for services to be ready
+        run: |
+          set -e
+          urls=(
+            "http://localhost:5173"       # frontend
+            "http://localhost:5001/health" # users
+            "http://localhost:5002/health" # books
+            "http://localhost:5004/health" # placeorder
+            "http://localhost:5005/health" # displayorders
+          )
+          for u in "${urls[@]}"; do
+            echo "Waiting for $u ..."
+            for i in {1..60}; do
+              if curl -fsS "$u" >/dev/null; then
+                echo "OK: $u"
+                break
+              fi
+              sleep 2
+            done
+          done
+
+      - name: Health check (fallback index if no /health)
+        run: |
+          set -e
+          curl -f http://localhost:5173
+          curl -f http://localhost:5001/health || curl -f http://localhost:5001/
+          curl -f http://localhost:5002/health || curl -f http://localhost:5002/
+          curl -f http://localhost:5004/health || curl -f http://localhost:5004/
+          curl -f http://localhost:5005/health || curl -f http://localhost:5005/
+          echo "All published services are responding"
+
+      - name: Basic API smoke tests
+        run: |
+          set -e
+          echo "Books API list..."
+          curl -fsS "http://localhost:5002/books?page=1&limit=10" >/dev/null || (echo "Books API failed" && exit 1)
+
+          echo "Users register (if route exists)..."
+          code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
+            -d '{"username":"testuser","email":"test@example.com","password":"testpass123"}' \
+            http://localhost:5001/register || true)
+          echo "Users /register returned HTTP $code (ok if 404/405 if not implemented)"
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v
+          docker compose ps
