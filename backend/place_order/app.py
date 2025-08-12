@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
-from auth import jwt_required
-from rabbitmq import RabbitMQClient
+from shared.auth import jwt_required
+from shared.rabbitmq import RabbitMQClient
 
 app = Flask(__name__)
 CORS(app)
