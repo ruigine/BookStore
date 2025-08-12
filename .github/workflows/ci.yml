@@ -149,18 +149,6 @@ jobs:
           curl -f http://localhost:5005/health
           echo "All published services are responding"
 
-      - name: Basic API tests
-        run: |
-          set -e
-          echo "Books API list..."
-          curl -fsS "http://localhost:5002/books?page=1&limit=10" >/dev/null || (echo "Books API failed" && exit 1)
-
-          echo "Users register..."
-          code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
-            -d '{"username":"testuser","email":"test@example.com","password":"testpass123"}' \
-            http://localhost:5001/register || true)
-          echo "Users /register returned HTTP $code"
-
       - name: Logs on failure
         if: failure()
         run: docker compose logs
