@@ -1,7 +1,7 @@
 import json
 import requests
 import time
-from rabbitmq import RabbitMQClient
+from shared.rabbitmq import RabbitMQClient
 
 ORDERS_URL = "http://orders:5003/orders"
 BOOKS_URL = "http://books:5002/books"
