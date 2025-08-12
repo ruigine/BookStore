@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
-from model import db, User
+from .model import db, User
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 
@@ -195,7 +195,7 @@ def refresh_token():
 
         user_id = payload["sub"]
 
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
 
         if not user:
             return jsonify(
@@ -267,5 +267,5 @@ def logout():
     resp.set_cookie("refresh_token", "", expires=0, path="/refresh-token")
     return resp
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     app.run(host='0.0.0.0', port=5001, debug=True)
