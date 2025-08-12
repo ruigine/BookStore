@@ -56,7 +56,7 @@ export default function MyOrdersPage() {
 
           setHasMore(data.pagination["has_more"])
 
-          console.log(data)
+          // console.log(data)
           if (!scrollAttached.current) {
             window.addEventListener("scroll", handleScroll)
             scrollAttached.current = true

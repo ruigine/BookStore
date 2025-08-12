@@ -72,7 +72,7 @@ export default function BrowseBooks() {
 
           setHasMore(data.pagination["has_more"])
           
-          console.log(url, data);
+          // console.log(url, data);
         }
       } catch (err) {
         console.error("Error fetching books:", err);

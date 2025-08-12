@@ -124,7 +124,7 @@ export default function BookDetail() {
 
         if (res.ok && data.hasPending) {
           setHasPending(true)
-          console.log(data)
+          // console.log(data)
           setOrderId(data.data['order_id'])
         }
       } catch (err) {
