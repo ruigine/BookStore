@@ -6,6 +6,9 @@ import urllib.parse
 from books.model import Book
 from decimal import Decimal
 
+# ------------------------
+# Unit tests
+# ------------------------
 
 @pytest.mark.unit
 def test_book_json_includes_all_fields_and_values():
@@ -71,6 +74,9 @@ def test_book_json_keeps_optional_keys_when_none():
     assert j["price"] == Decimal("1.00")
     assert j["quantity"] == 0
 
+# ------------------------
+# Integration tests
+# ------------------------
 
 @pytest.mark.integration
 def test_get_books_defaults(client):

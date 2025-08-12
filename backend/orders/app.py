@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from os import environ
-from model import db, Order
+from .model import db, Order
 from sqlalchemy import desc
 
 app = Flask(__name__)
