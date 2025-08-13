@@ -46,7 +46,7 @@ A small bookstore built as a React SPA with a Python Flask microservices backend
 ## Quick start (Docker)
 
 1) **Prerequisites**: Docker & Docker Compose installed.
-2) **Copy env**: Create a `.env` at the repo root (or copy an existing one). _Emvironment variables needed_:
+2) **Copy env**: Create a `.env` at the repo root (or copy the provided .env file into repo root). _Emvironment variables needed_:
 ```
 # ---- Database: MySQL root password and DB name ----
 MYSQL_PW=your_mysql_root_password 
@@ -210,7 +210,7 @@ pytest.ini
   3. Calls `orders PUT /orders/{order_id}` to update `status` to `completed` (or `failed` on error).
 
 ### Reliability notes
-- Message delivery is **at-least-once**. To harden:
+- Message delivery is **at-most-once**. To harden:
   - add a `processed_at` flag/version on Orders to ensure idempotency
   - configure a DLQ + retry policy
 
