@@ -9,6 +9,7 @@ A small bookstore built as a React SPA with a Python Flask microservices backend
 - [Quick Start (Docker)](#quick-start-docker)
 - [Services & Ports](#services--ports)
 - [Database & Seed Data](#database--seed-data)
+- [API Reference](#api-reference)
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
 - [Async Processing (RabbitMQ)](#async-processing-rabbitmq)
@@ -131,6 +132,20 @@ docker compose down
 | url        | TEXT            | image URL copy |
 | order_date | DATETIME        |  |
 
+## API Reference
+
+> All docs live under `docs/`
+
+**Services**
+- [Users Service API](docs/USERS_API.md)
+- [Books Service API](docs/BOOKS_API.md)
+- [Orders Service API](docs/ORDERS_API.md)
+- [Place Order Service API](docs/PLACE_ORDER_API.md)
+- [Display Orders Service API](docs/DISPLAY_ORDERS_API.md)
+
+**Worker & Shared**
+- [Order Processing Worker](docs/ORDER_PROCESSING_WORKER.md)
+- [Shared Helpers](docs/SHARED_HELPERS.md)
 
 ## Testing
 
